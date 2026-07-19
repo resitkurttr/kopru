@@ -11,6 +11,7 @@ from typing import Dict, List, Optional
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .router import Router, Tier
@@ -23,6 +24,16 @@ WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
 def create_app(config_path: Optional[str] = None) -> FastAPI:
     app = FastAPI(title="Köprü Gateway", version="1.0.0")
+
+    # CORS — GitHub Pages ve farklı origin'lerden erişim için
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     router = Router(config_path)
 
     class ChatMessage(BaseModel):

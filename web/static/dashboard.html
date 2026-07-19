@@ -138,6 +138,12 @@
     <div class="nav-item" data-view="catalog"><span class="icon">📚</span> Katalog (277)</div>
     <div class="nav-item" data-view="test"><span class="icon">💬</span> Test Sorgusu</div>
     <div class="nav-item" data-view="stats"><span class="icon">📈</span> İstatistikler</div>
+    <div style="padding:16px 20px; margin-top:16px; border-top:1px solid var(--color-border);">
+      <label style="font-size:12px;color:var(--color-muted);display:block;margin-bottom:6px;">API URL</label>
+      <input id="api-url" value="http://194.146.36.72:20128" 
+             style="width:100%;padding:8px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:6px;color:var(--color-text);font-size:12px;"
+             onchange="setApiUrl(this.value)">
+    </div>
   </aside>
 
   <!-- Main -->
@@ -226,12 +232,21 @@ document.querySelectorAll('.nav-item').forEach(item => {
   });
 });
 
+// ── Config ──
+const API_BASE = (localStorage.getItem('kopru_api_url') || 'http://194.146.36.72:20128').replace(/\/$/, '');
+
+// API URL ayarla
+function setApiUrl(url) {
+  localStorage.setItem('kopru_api_url', url);
+  location.reload();
+}
+
 // ── Data loaders ──
 async function loadOverview() {
   try {
     const [prov, status] = await Promise.all([
-      fetch('/api/providers').then(r => r.json()),
-      fetch('/api/status').then(r => r.json())
+      fetch(API_BASE + '/api/providers').then(r => r.json()),
+      fetch(API_BASE + '/api/status').then(r => r.json())
     ]);
     const active = Object.values(prov).filter(p => p.enabled && p.healthy).length;
     document.getElementById('ov-providers').textContent = active;
@@ -243,7 +258,7 @@ async function loadOverview() {
 
 async function loadProviders() {
   try {
-    const data = await fetch('/api/providers').then(r => r.json());
+    const data = await fetch(API_BASE + '/api/providers').then(r => r.json());
     const el = document.getElementById('provider-list');
     el.innerHTML = '';
     for (const [name, info] of Object.entries(data)) {
@@ -264,7 +279,7 @@ async function loadProviders() {
 
 async function loadCatalog() {
   try {
-    const data = await fetch('/api/providers-catalog').then(r => r.json());
+    const data = await fetch(API_BASE + '/api/providers-catalog').then(r => r.json());
     const total = Object.keys(data.providers || {}).length;
     document.getElementById('cat-count').textContent = total;
     const el = document.getElementById('catalog-list');
@@ -282,7 +297,7 @@ async function loadCatalog() {
 
 async function loadStats() {
   try {
-    const d = await fetch('/api/status').then(r => r.json());
+    const d = await fetch(API_BASE + '/api/status').then(r => r.json());
     document.getElementById('st-total').textContent = d.total_requests;
     const rate = d.total_requests ? Math.round(d.successful / d.total_requests * 100) : 0;
     document.getElementById('st-rate').textContent = rate + '%';
@@ -297,7 +312,7 @@ async function loadStats() {
 
 async function loadModels() {
   try {
-    const data = await fetch('/v1/models').then(r => r.json());
+    const data = await fetch(API_BASE + '/v1/models').then(r => r.json());
     const sel = document.getElementById('model');
     sel.innerHTML = '<option value="">Otomatik (fallback)</option>';
     (data.data || []).forEach(m => sel.innerHTML += `<option value="${m.id}">${m.id}</option>`);
@@ -310,7 +325,7 @@ async function send() {
   const resp = document.getElementById('response');
   resp.textContent = '⏳ Düşünüyor...';
   try {
-    const res = await fetch('/v1/chat/completions', {
+    const res = await fetch(API_BASE + '/v1/chat/completions', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ model, stream: false, messages: [{role: 'user', content: prompt}] })
     });
