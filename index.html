@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Köprü — AI Gateway Dashboard</title>
+<style>
+  :root {
+    --color-primary: #e54d5e;
+    --color-primary-hover: #c93d4e;
+    --color-accent: #6366f1;
+    --color-accent-hover: #8b5cf6;
+    --color-success: #22c55e;
+    --color-error: #ef4444;
+    --color-warning: #f59e0b;
+    --color-bg: #0d1117;
+    --color-bg-alt: #161b22;
+    --color-surface: #21262d;
+    --color-card: #161b22;
+    --color-border: #30363d;
+    --color-text: #c9d1d9;
+    --color-muted: #8b949e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--color-bg); color: var(--color-text);
+    line-height: 1.6; display: flex; min-height: 100vh;
+  }
+  /* Sidebar */
+  .sidebar {
+    width: 240px; background: var(--color-bg-alt); border-right: 1px solid var(--color-border);
+    padding: 20px 0; position: fixed; height: 100vh; overflow-y: auto;
+  }
+  .sidebar .brand {
+    display: flex; align-items: center; gap: 10px; padding: 0 20px 20px;
+    border-bottom: 1px solid var(--color-border); margin-bottom: 16px;
+  }
+  .sidebar .brand .logo { font-size: 28px; }
+  .sidebar .brand h1 { font-size: 20px; font-weight: 700; }
+  .sidebar .brand span { font-size: 11px; color: var(--color-muted); }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+    color: var(--color-muted); cursor: pointer; transition: 0.2s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover, .nav-item.active {
+    color: var(--color-text); background: var(--color-surface);
+    border-left-color: var(--color-primary);
+  }
+  .nav-item .icon { font-size: 18px; }
+  /* Main */
+  .main { margin-left: 240px; flex: 1; padding: 24px; max-width: 1200px; }
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+  }
+  .header h2 { font-size: 24px; font-weight: 700; }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: 20px; font-size: 13px;
+  }
+  .status-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); }
+  /* Cards */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--color-card); border: 1px solid var(--color-border);
+    border-radius: 12px; padding: 20px;
+  }
+  .card h3 { font-size: 14px; color: var(--color-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  /* Provider topology */
+  .provider-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--color-border);
+  }
+  .provider-row:last-child { border-bottom: none; }
+  .provider-name { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+  .provider-icon {
+    width: 28px; height: 28px; border-radius: 6px; display: flex;
+    align-items: center; justify-content: center; font-size: 14px; font-weight: 700;
+    background: var(--color-surface); color: var(--color-primary);
+  }
+  .provider-meta { font-size: 12px; color: var(--color-muted); }
+  .badge {
+    padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  }
+  .badge.ok { background: rgba(34,197,94,0.15); color: var(--color-success); }
+  .badge.bad { background: rgba(239,68,68,0.15); color: var(--color-error); }
+  .badge.warn { background: rgba(245,158,11,0.15); color: var(--color-warning); }
+  /* Stats */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stat { text-align: center; padding: 16px; }
+  .stat .num { font-size: 28px; font-weight: 800; color: var(--color-primary); }
+  .stat .label { font-size: 12px; color: var(--color-muted); margin-top: 4px; }
+  /* Chat test */
+  .chat-box {
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: 12px; padding: 20px; margin-top: 16px;
+  }
+  textarea, input, select {
+    width: 100%; background: var(--color-bg); border: 1px solid var(--color-border);
+    color: var(--color-text); padding: 12px; border-radius: 8px;
+    font-family: inherit; font-size: 14px; resize: vertical;
+  }
+  textarea { min-height: 80px; margin-bottom: 10px; }
+  button {
+    background: var(--color-primary); color: #fff; border: none;
+    padding: 12px 24px; border-radius: 8px; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: 0.2s;
+  }
+  button:hover { background: var(--color-primary-hover); }
+  .response {
+    background: var(--color-bg); border: 1px solid var(--color-border);
+    border-radius: 8px; padding: 16px; margin-top: 12px; min-height: 80px;
+    white-space: pre-wrap; font-size: 14px;
+  }
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .hidden { display: none; }
+  /* Tier coverage */
+  .tier-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .tier-bar .seg { height: 100%; }
+</style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="logo">🌉</span>
+      <div>
+        <h1>Köprü</h1>
+        <span>AI Gateway v1.0</span>
+      </div>
+    </div>
+    <div class="nav-item active" data-view="overview"><span class="icon">📊</span> Genel Bakış</div>
+    <div class="nav-item" data-view="providers"><span class="icon">🔗</span> Provider'lar</div>
+    <div class="nav-item" data-view="catalog"><span class="icon">📚</span> Katalog (277)</div>
+    <div class="nav-item" data-view="test"><span class="icon">💬</span> Test Sorgusu</div>
+    <div class="nav-item" data-view="stats"><span class="icon">📈</span> İstatistikler</div>
+    <div style="padding:16px 20px; margin-top:16px; border-top:1px solid var(--color-border);">
+      <label style="font-size:12px;color:var(--color-muted);display:block;margin-bottom:6px;">API URL</label>
+      <input id="api-url" value="http://194.146.36.72:20128" 
+             style="width:100%;padding:8px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:6px;color:var(--color-text);font-size:12px;"
+             onchange="setApiUrl(this.value)">
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Overview -->
+    <section id="view-overview" class="section">
+      <div class="header">
+        <h2>Genel Bakış</h2>
+        <span class="status-pill"><span class="dot"></span> Çalışıyor · Port 20128</span>
+      </div>
+      <div class="stat-grid">
+        <div class="card stat"><div class="num" id="ov-providers">0</div><div class="label">Aktif Provider</div></div>
+        <div class="card stat"><div class="num" id="ov-total">0</div><div class="label">Toplam İstek</div></div>
+        <div class="card stat"><div class="num" id="ov-success">0</div><div class="label">Başarılı</div></div>
+        <div class="card stat"><div class="num" id="ov-fallback">0</div><div class="label">Fallback</div></div>
+      </div>
+      <div class="grid" style="margin-top:16px">
+        <div class="card">
+          <h3>Tier Coverage</h3>
+          <div class="tier-bar">
+            <div class="seg" style="background:var(--color-primary);width:40%"></div>
+            <div class="seg" style="background:var(--color-accent);width:35%"></div>
+            <div class="seg" style="background:var(--color-success);width:25%"></div>
+          </div>
+          <p style="font-size:12px;color:var(--color-muted);margin-top:8px">
+            Best-Reasoning · Moderate · Cheapest katmanları otomatik seçilir.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Endpoint</h3>
+          <p style="font-size:13px;word-break:break-all"><code>http://localhost:20128/v1/chat/completions</code></p>
+          <p style="font-size:12px;color:var(--color-muted);margin-top:8px">OpenAI uyumlu · Claude Code / Cursor / OpenCode bağlanabilir</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Providers -->
+    <section id="view-providers" class="section hidden">
+      <div class="header"><h2>Provider Durumu</h2></div>
+      <div class="card"><div id="provider-list"><p style="color:var(--color-muted)">Yükleniyor...</p></div></div>
+    </section>
+
+    <!-- Catalog -->
+    <section id="view-catalog" class="section hidden">
+      <div class="header"><h2>Provider Kataloğu</h2><span class="status-pill" id="cat-count">277</span></div>
+      <div id="catalog-list"></div>
+    </section>
+
+    <!-- Test -->
+    <section id="view-test" class="section hidden">
+      <div class="header"><h2>Test Sorgusu</h2></div>
+      <div class="chat-box">
+        <select id="model"></select>
+        <textarea id="prompt" placeholder="Mesajını yaz...">Merhaba Köprü, nasılsın?</textarea>
+        <button onclick="send()">Gönder</button>
+        <div id="response" class="response"></div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section id="view-stats" class="section hidden">
+      <div class="header"><h2>İstatistikler</h2></div>
+      <div class="grid">
+        <div class="card"><h3>Toplam İstek</h3><div class="num" id="st-total" style="font-size:32px;font-weight:800;color:var(--color-primary)">0</div></div>
+        <div class="card"><h3>Başarı Oranı</h3><div class="num" id="st-rate" style="font-size:32px;font-weight:800;color:var(--color-success)">0%</div></div>
+        <div class="card"><h3>Fallback Kullanımı</h3><div class="num" id="st-fallback" style="font-size:32px;font-weight:800;color:var(--color-warning)">0</div></div>
+        <div class="card"><h3>Toplam Token</h3><div class="num" id="st-tokens" style="font-size:32px;font-weight:800;color:var(--color-accent)">0</div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Provider Bazlı İstek</h3>
+        <div id="st-per-provider"></div>
+      </div>
+    </section>
+  </main>
+
+<script>
+// ── Navigation ──
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+    item.classList.add('active');
+    document.getElementById('view-' + item.dataset.view).classList.remove('hidden');
+    if (item.dataset.view === 'catalog') loadCatalog();
+    if (item.dataset.view === 'providers') loadProviders();
+  });
+});
+
+// ── Config ──
+const API_BASE = (localStorage.getItem('kopru_api_url') || 'http://194.146.36.72:20128').replace(/\/$/, '');
+
+// API URL ayarla
+function setApiUrl(url) {
+  localStorage.setItem('kopru_api_url', url);
+  location.reload();
+}
+
+// ── Data loaders ──
+async function loadOverview() {
+  try {
+    const [prov, status] = await Promise.all([
+      fetch(API_BASE + '/api/providers').then(r => r.json()),
+      fetch(API_BASE + '/api/status').then(r => r.json())
+    ]);
+    const active = Object.values(prov).filter(p => p.enabled && p.healthy).length;
+    document.getElementById('ov-providers').textContent = active;
+    document.getElementById('ov-total').textContent = status.total_requests;
+    document.getElementById('ov-success').textContent = status.successful;
+    document.getElementById('ov-fallback').textContent = status.fallback_used;
+  } catch (e) {}
+}
+
+async function loadProviders() {
+  try {
+    const data = await fetch(API_BASE + '/api/providers').then(r => r.json());
+    const el = document.getElementById('provider-list');
+    el.innerHTML = '';
+    for (const [name, info] of Object.entries(data)) {
+      const badge = info.healthy ? '<span class="badge ok">çalışıyor</span>'
+                                  : (info.circuit_open ? '<span class="badge bad">devre açık</span>' : '<span class="badge warn">serviste</span>');
+      el.innerHTML += `<div class="provider-row">
+        <div class="provider-name"><div class="provider-icon">${name[0].toUpperCase()}</div>${name}</div>
+        <div style="text-align:right">
+          <div class="provider-meta">${info.models.join(', ')}</div>
+          ${badge}
+        </div>
+      </div>`;
+    }
+  } catch (e) {
+    document.getElementById('provider-list').innerHTML = '<p style="color:var(--color-error)">Yüklenemedi</p>';
+  }
+}
+
+async function loadCatalog() {
+  try {
+    const data = await fetch(API_BASE + '/api/providers-catalog').then(r => r.json());
+    const total = Object.keys(data.providers || {}).length;
+    document.getElementById('cat-count').textContent = total;
+    const el = document.getElementById('catalog-list');
+    el.innerHTML = '';
+    for (const [cat, ids] of Object.entries(data.categories || {})) {
+      el.innerHTML += `<div class="card" style="margin-bottom:12px">
+        <h3>${cat} (${ids.length})</h3>
+        <div class="provider-meta">${ids.join(' · ')}</div>
+      </div>`;
+    }
+  } catch (e) {
+    document.getElementById('catalog-list').innerHTML = '<p style="color:var(--color-error)">Katalog yüklenemedi</p>';
+  }
+}
+
+async function loadStats() {
+  try {
+    const d = await fetch(API_BASE + '/api/status').then(r => r.json());
+    document.getElementById('st-total').textContent = d.total_requests;
+    const rate = d.total_requests ? Math.round(d.successful / d.total_requests * 100) : 0;
+    document.getElementById('st-rate').textContent = rate + '%';
+    document.getElementById('st-fallback').textContent = d.fallback_used;
+    document.getElementById('st-tokens').textContent = d.total_tokens;
+    const pp = document.getElementById('st-per-provider');
+    pp.innerHTML = Object.entries(d.per_provider || {})
+      .map(([k,v]) => `<div class="provider-row"><span>${k}</span><span class="provider-meta">${v} istek</span></div>`)
+      .join('') || '<p style="color:var(--color-muted)">Henüz veri yok</p>';
+  } catch (e) {}
+}
+
+async function loadModels() {
+  try {
+    const data = await fetch(API_BASE + '/v1/models').then(r => r.json());
+    const sel = document.getElementById('model');
+    sel.innerHTML = '<option value="">Otomatik (fallback)</option>';
+    (data.data || []).forEach(m => sel.innerHTML += `<option value="${m.id}">${m.id}</option>`);
+  } catch (e) {}
+}
+
+async function send() {
+  const model = document.getElementById('model').value;
+  const prompt = document.getElementById('prompt').value;
+  const resp = document.getElementById('response');
+  resp.textContent = '⏳ Düşünüyor...';
+  try {
+    const res = await fetch(API_BASE + '/v1/chat/completions', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ model, stream: false, messages: [{role: 'user', content: prompt}] })
+    });
+    const data = await res.json();
+    if (data.error) resp.textContent = '❌ ' + data.error.message;
+    else resp.textContent = data.choices[0].message.content;
+    loadOverview(); loadStats();
+  } catch (e) { resp.textContent = '❌ Bağlantı hatası: ' + e; }
+}
+
+// Init
+loadOverview(); loadModels(); loadStats();
+setInterval(() => { loadOverview(); loadStats(); }, 15000);
+</script>
+</body>
+</html>
