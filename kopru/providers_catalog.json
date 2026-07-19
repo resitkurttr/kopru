@@ -1,0 +1,1149 @@
+{
+  "providers": {
+    "opencode": {
+      "category": "noauth"
+    },
+    "duckduckgo-web": {
+      "category": "noauth"
+    },
+    "felo-web": {
+      "category": "noauth"
+    },
+    "theoldllm": {
+      "category": "noauth"
+    },
+    "chipotle": {
+      "category": "noauth"
+    },
+    "veoaifree-web": {
+      "category": "noauth"
+    },
+    "mimocode": {
+      "category": "noauth"
+    },
+    "auggie": {
+      "category": "noauth"
+    },
+    "notice": {
+      "category": "apikey-specialty"
+    },
+    "xai-oauth": {
+      "category": "oauth"
+    },
+    "grok-cli": {
+      "category": "oauth"
+    },
+    "qoder": {
+      "category": "oauth"
+    },
+    "qwen": {
+      "category": "oauth"
+    },
+    "agy": {
+      "category": "oauth"
+    },
+    "kiro": {
+      "category": "oauth"
+    },
+    "amazon-q": {
+      "category": "oauth"
+    },
+    "claude": {
+      "category": "oauth"
+    },
+    "antigravity": {
+      "category": "oauth"
+    },
+    "codex": {
+      "category": "oauth"
+    },
+    "github": {
+      "category": "oauth"
+    },
+    "gitlab-duo": {
+      "category": "oauth"
+    },
+    "cursor": {
+      "category": "oauth"
+    },
+    "zed": {
+      "category": "oauth"
+    },
+    "zed-hosted": {
+      "category": "oauth"
+    },
+    "trae": {
+      "category": "oauth"
+    },
+    "kimi-coding": {
+      "category": "oauth"
+    },
+    "kilocode": {
+      "category": "oauth"
+    },
+    "cline": {
+      "category": "oauth"
+    },
+    "clinepass": {
+      "category": "oauth"
+    },
+    "windsurf": {
+      "category": "oauth"
+    },
+    "devin-cli": {
+      "category": "oauth"
+    },
+    "codebuddy-cn": {
+      "category": "oauth"
+    },
+    "chatgpt-web": {
+      "category": "web-cookie"
+    },
+    "grok-web": {
+      "category": "web-cookie"
+    },
+    "gemini-web": {
+      "category": "web-cookie"
+    },
+    "perplexity-web": {
+      "category": "web-cookie"
+    },
+    "blackbox-web": {
+      "category": "web-cookie"
+    },
+    "muse-spark-web": {
+      "category": "web-cookie"
+    },
+    "claude-web": {
+      "category": "web-cookie"
+    },
+    "deepseek-web": {
+      "category": "web-cookie"
+    },
+    "copilot-web": {
+      "category": "web-cookie"
+    },
+    "copilot-m365-web": {
+      "category": "web-cookie"
+    },
+    "microsoft-designer-web": {
+      "category": "web-cookie"
+    },
+    "t3-web": {
+      "category": "web-cookie"
+    },
+    "inner-ai": {
+      "category": "web-cookie"
+    },
+    "adapta-web": {
+      "category": "web-cookie"
+    },
+    "lmarena": {
+      "category": "web-cookie"
+    },
+    "yuanbao-web": {
+      "category": "web-cookie"
+    },
+    "huggingchat": {
+      "category": "web-cookie"
+    },
+    "poe-web": {
+      "category": "web-cookie"
+    },
+    "venice-web": {
+      "category": "web-cookie"
+    },
+    "v0-vercel-web": {
+      "category": "web-cookie"
+    },
+    "kimi-web": {
+      "category": "web-cookie"
+    },
+    "doubao-web": {
+      "category": "web-cookie"
+    },
+    "qwen-web": {
+      "category": "web-cookie"
+    },
+    "gemini-business": {
+      "category": "web-cookie"
+    },
+    "zenmux-free": {
+      "category": "web-cookie"
+    },
+    "zai-web": {
+      "category": "web-cookie"
+    },
+    "notion-web": {
+      "category": "web-cookie"
+    },
+    "ollama-local": {
+      "category": "local"
+    },
+    "lm-studio": {
+      "category": "local"
+    },
+    "vllm": {
+      "category": "local"
+    },
+    "lemonade": {
+      "category": "local"
+    },
+    "llamafile": {
+      "category": "local"
+    },
+    "llama-cpp": {
+      "category": "local"
+    },
+    "triton": {
+      "category": "local"
+    },
+    "docker-model-runner": {
+      "category": "local"
+    },
+    "xinference": {
+      "category": "local"
+    },
+    "oobabooga": {
+      "category": "local"
+    },
+    "sdwebui": {
+      "category": "local"
+    },
+    "comfyui": {
+      "category": "local"
+    },
+    "perplexity-search": {
+      "category": "search"
+    },
+    "serper-search": {
+      "category": "search"
+    },
+    "brave-search": {
+      "category": "search"
+    },
+    "exa-search": {
+      "category": "search"
+    },
+    "tavily-search": {
+      "category": "search"
+    },
+    "google-pse-search": {
+      "category": "search"
+    },
+    "linkup-search": {
+      "category": "search"
+    },
+    "searchapi-search": {
+      "category": "search"
+    },
+    "youcom-search": {
+      "category": "search"
+    },
+    "searxng-search": {
+      "category": "search"
+    },
+    "ollama-search": {
+      "category": "search"
+    },
+    "deepgram": {
+      "category": "audio"
+    },
+    "assemblyai": {
+      "category": "audio"
+    },
+    "elevenlabs": {
+      "category": "audio"
+    },
+    "cartesia": {
+      "category": "audio"
+    },
+    "playht": {
+      "category": "audio"
+    },
+    "inworld": {
+      "category": "audio"
+    },
+    "aws-polly": {
+      "category": "audio"
+    },
+    "gladia": {
+      "category": "audio"
+    },
+    "rev-ai": {
+      "category": "audio"
+    },
+    "speechmatics": {
+      "category": "audio"
+    },
+    "cliproxyapi": {
+      "category": "upstream-proxy"
+    },
+    "9router": {
+      "category": "upstream-proxy"
+    },
+    "jules": {
+      "category": "cloud-agent"
+    },
+    "devin": {
+      "category": "cloud-agent"
+    },
+    "codex-cloud": {
+      "category": "cloud-agent"
+    },
+    "charm-hyper": {
+      "category": "apikey-gateways"
+    },
+    "agentrouter": {
+      "category": "apikey-gateways"
+    },
+    "command-code": {
+      "category": "apikey-gateways"
+    },
+    "openrouter": {
+      "category": "apikey-gateways"
+    },
+    "requesty": {
+      "category": "apikey-gateways"
+    },
+    "dgrid": {
+      "category": "apikey-gateways"
+    },
+    "qiniu": {
+      "category": "apikey-gateways"
+    },
+    "orcarouter": {
+      "category": "apikey-gateways"
+    },
+    "api-airforce": {
+      "category": "apikey-gateways"
+    },
+    "crof": {
+      "category": "apikey-gateways"
+    },
+    "bazaarlink": {
+      "category": "apikey-gateways"
+    },
+    "synthetic": {
+      "category": "apikey-gateways"
+    },
+    "kilo-gateway": {
+      "category": "apikey-gateways"
+    },
+    "wafer": {
+      "category": "apikey-gateways"
+    },
+    "opencode-zen": {
+      "category": "apikey-gateways"
+    },
+    "opencode-go": {
+      "category": "apikey-gateways"
+    },
+    "dahl": {
+      "category": "apikey-gateways"
+    },
+    "puter": {
+      "category": "apikey-gateways"
+    },
+    "uncloseai": {
+      "category": "apikey-gateways"
+    },
+    "hackclub": {
+      "category": "apikey-gateways"
+    },
+    "freetheai": {
+      "category": "apikey-gateways"
+    },
+    "g4f-groq": {
+      "category": "apikey-gateways"
+    },
+    "g4f-gemini": {
+      "category": "apikey-gateways"
+    },
+    "g4f-pollinations": {
+      "category": "apikey-gateways"
+    },
+    "g4f-ollama": {
+      "category": "apikey-gateways"
+    },
+    "g4f-nvidia": {
+      "category": "apikey-gateways"
+    },
+    "vercel-ai-gateway": {
+      "category": "apikey-gateways"
+    },
+    "llm7": {
+      "category": "apikey-gateways"
+    },
+    "llamagate": {
+      "category": "apikey-gateways"
+    },
+    "gitlawb": {
+      "category": "apikey-gateways"
+    },
+    "gitlawb-gmi": {
+      "category": "apikey-gateways"
+    },
+    "nanogpt": {
+      "category": "apikey-gateways"
+    },
+    "aimlapi": {
+      "category": "apikey-gateways"
+    },
+    "novita": {
+      "category": "apikey-gateways"
+    },
+    "piapi": {
+      "category": "apikey-gateways"
+    },
+    "getgoapi": {
+      "category": "apikey-gateways"
+    },
+    "laozhang": {
+      "category": "apikey-gateways"
+    },
+    "thebai": {
+      "category": "apikey-gateways"
+    },
+    "bai": {
+      "category": "apikey-gateways"
+    },
+    "fenayai": {
+      "category": "apikey-gateways"
+    },
+    "empower": {
+      "category": "apikey-gateways"
+    },
+    "poe": {
+      "category": "apikey-gateways"
+    },
+    "chutes": {
+      "category": "apikey-gateways"
+    },
+    "factory": {
+      "category": "apikey-gateways"
+    },
+    "bluesminds": {
+      "category": "apikey-gateways"
+    },
+    "freemodel-dev": {
+      "category": "apikey-gateways"
+    },
+    "freeaiapikey": {
+      "category": "apikey-gateways"
+    },
+    "zenmux": {
+      "category": "apikey-gateways"
+    },
+    "openadapter": {
+      "category": "apikey-gateways"
+    },
+    "dit": {
+      "category": "apikey-gateways"
+    },
+    "tokenrouter": {
+      "category": "apikey-gateways"
+    },
+    "sumopod": {
+      "category": "apikey-gateways"
+    },
+    "x5lab": {
+      "category": "apikey-gateways"
+    },
+    "chenzk": {
+      "category": "apikey-gateways"
+    },
+    "kenari": {
+      "category": "apikey-gateways"
+    },
+    "openai": {
+      "category": "apikey-frontier"
+    },
+    "reka": {
+      "category": "apikey-frontier"
+    },
+    "pioneer": {
+      "category": "apikey-frontier"
+    },
+    "anthropic": {
+      "category": "apikey-frontier"
+    },
+    "gemini": {
+      "category": "apikey-frontier"
+    },
+    "groq": {
+      "category": "apikey-frontier"
+    },
+    "blackbox": {
+      "category": "apikey-frontier"
+    },
+    "xai": {
+      "category": "apikey-frontier"
+    },
+    "mistral": {
+      "category": "apikey-frontier"
+    },
+    "perplexity": {
+      "category": "apikey-frontier"
+    },
+    "cohere": {
+      "category": "apikey-frontier"
+    },
+    "meta-llama": {
+      "category": "apikey-frontier"
+    },
+    "morph": {
+      "category": "apikey-frontier"
+    },
+    "galadriel": {
+      "category": "apikey-frontier"
+    },
+    "ai21": {
+      "category": "apikey-frontier"
+    },
+    "venice": {
+      "category": "apikey-frontier"
+    },
+    "codestral": {
+      "category": "apikey-frontier"
+    },
+    "upstage": {
+      "category": "apikey-frontier"
+    },
+    "maritalk": {
+      "category": "apikey-frontier"
+    },
+    "nous-research": {
+      "category": "apikey-frontier"
+    },
+    "arcee-ai": {
+      "category": "apikey-frontier"
+    },
+    "liquid": {
+      "category": "apikey-frontier"
+    },
+    "together": {
+      "category": "apikey-inference"
+    },
+    "openvecta": {
+      "category": "apikey-inference"
+    },
+    "fireworks": {
+      "category": "apikey-inference"
+    },
+    "cerebras": {
+      "category": "apikey-inference"
+    },
+    "nvidia": {
+      "category": "apikey-inference"
+    },
+    "nebius": {
+      "category": "apikey-inference"
+    },
+    "nube": {
+      "category": "apikey-inference"
+    },
+    "siliconflow": {
+      "category": "apikey-inference"
+    },
+    "hyperbolic": {
+      "category": "apikey-inference"
+    },
+    "ollama-cloud": {
+      "category": "apikey-inference"
+    },
+    "huggingface": {
+      "category": "apikey-inference"
+    },
+    "github-models": {
+      "category": "apikey-inference"
+    },
+    "deepinfra": {
+      "category": "apikey-inference"
+    },
+    "lambda-ai": {
+      "category": "apikey-inference"
+    },
+    "sambanova": {
+      "category": "apikey-inference"
+    },
+    "nscale": {
+      "category": "apikey-inference"
+    },
+    "baseten": {
+      "category": "apikey-inference"
+    },
+    "publicai": {
+      "category": "apikey-inference"
+    },
+    "featherless-ai": {
+      "category": "apikey-inference"
+    },
+    "friendliai": {
+      "category": "apikey-inference"
+    },
+    "wandb": {
+      "category": "apikey-inference"
+    },
+    "inference-net": {
+      "category": "apikey-inference"
+    },
+    "predibase": {
+      "category": "apikey-inference"
+    },
+    "bytez": {
+      "category": "apikey-inference"
+    },
+    "monsterapi": {
+      "category": "apikey-inference"
+    },
+    "modelscope": {
+      "category": "apikey-inference"
+    },
+    "byteplus": {
+      "category": "apikey-inference"
+    },
+    "digitalocean": {
+      "category": "apikey-inference"
+    },
+    "azure-openai": {
+      "category": "apikey-enterprise"
+    },
+    "azure-ai": {
+      "category": "apikey-enterprise"
+    },
+    "bedrock": {
+      "category": "apikey-enterprise"
+    },
+    "watsonx": {
+      "category": "apikey-enterprise"
+    },
+    "oci": {
+      "category": "apikey-enterprise"
+    },
+    "sap": {
+      "category": "apikey-enterprise"
+    },
+    "modal": {
+      "category": "apikey-enterprise"
+    },
+    "vertex": {
+      "category": "apikey-enterprise"
+    },
+    "vertex-partner": {
+      "category": "apikey-enterprise"
+    },
+    "cloudflare-ai": {
+      "category": "apikey-enterprise"
+    },
+    "scaleway": {
+      "category": "apikey-enterprise"
+    },
+    "ovhcloud": {
+      "category": "apikey-enterprise"
+    },
+    "heroku": {
+      "category": "apikey-enterprise"
+    },
+    "databricks": {
+      "category": "apikey-enterprise"
+    },
+    "datarobot": {
+      "category": "apikey-enterprise"
+    },
+    "clarifai": {
+      "category": "apikey-enterprise"
+    },
+    "snowflake": {
+      "category": "apikey-enterprise"
+    },
+    "qianfan": {
+      "category": "apikey-regional"
+    },
+    "glm": {
+      "category": "apikey-regional"
+    },
+    "glm-cn": {
+      "category": "apikey-regional"
+    },
+    "glmt": {
+      "category": "apikey-regional"
+    },
+    "bailian-coding-plan": {
+      "category": "apikey-regional"
+    },
+    "kimi": {
+      "category": "apikey-regional"
+    },
+    "kimi-coding-apikey": {
+      "category": "apikey-regional"
+    },
+    "minimax": {
+      "category": "apikey-regional"
+    },
+    "minimax-cn": {
+      "category": "apikey-regional"
+    },
+    "deepseek": {
+      "category": "apikey-regional"
+    },
+    "zai": {
+      "category": "apikey-regional"
+    },
+    "alibaba": {
+      "category": "apikey-regional"
+    },
+    "alibaba-cn": {
+      "category": "apikey-regional"
+    },
+    "longcat": {
+      "category": "apikey-regional"
+    },
+    "moonshot": {
+      "category": "apikey-regional"
+    },
+    "volcengine": {
+      "category": "apikey-regional"
+    },
+    "gigachat": {
+      "category": "apikey-regional"
+    },
+    "xiaomi-mimo": {
+      "category": "apikey-regional"
+    },
+    "baidu": {
+      "category": "apikey-regional"
+    },
+    "tencent": {
+      "category": "apikey-regional"
+    },
+    "iflytek": {
+      "category": "apikey-regional"
+    },
+    "baichuan": {
+      "category": "apikey-regional"
+    },
+    "yi": {
+      "category": "apikey-regional"
+    },
+    "stepfun": {
+      "category": "apikey-regional"
+    },
+    "coze": {
+      "category": "apikey-regional"
+    },
+    "360ai": {
+      "category": "apikey-regional"
+    },
+    "doubao": {
+      "category": "apikey-regional"
+    },
+    "sensenova": {
+      "category": "apikey-regional"
+    },
+    "sparkdesk": {
+      "category": "apikey-regional"
+    },
+    "hcnsec": {
+      "category": "apikey-regional"
+    },
+    "agnes": {
+      "category": "apikey-regional"
+    },
+    "nlpcloud": {
+      "category": "apikey-specialty"
+    },
+    "runwayml": {
+      "category": "apikey-specialty"
+    },
+    "kie": {
+      "category": "apikey-specialty"
+    },
+    "pollinations": {
+      "category": "apikey-specialty"
+    },
+    "haiper": {
+      "category": "apikey-specialty"
+    },
+    "leonardo": {
+      "category": "apikey-specialty"
+    },
+    "ideogram": {
+      "category": "apikey-specialty"
+    },
+    "freepik": {
+      "category": "apikey-specialty"
+    },
+    "suno": {
+      "category": "apikey-specialty"
+    },
+    "udio": {
+      "category": "apikey-specialty"
+    },
+    "v0-vercel": {
+      "category": "apikey-specialty"
+    },
+    "gitlab": {
+      "category": "apikey-specialty"
+    },
+    "voyage-ai": {
+      "category": "apikey-specialty"
+    },
+    "jina-ai": {
+      "category": "apikey-specialty"
+    },
+    "fal-ai": {
+      "category": "apikey-specialty"
+    },
+    "stability-ai": {
+      "category": "apikey-specialty"
+    },
+    "black-forest-labs": {
+      "category": "apikey-specialty"
+    },
+    "recraft": {
+      "category": "apikey-specialty"
+    },
+    "topaz": {
+      "category": "apikey-specialty"
+    },
+    "segmind": {
+      "category": "apikey-specialty"
+    },
+    "dify": {
+      "category": "apikey-specialty"
+    },
+    "nomic": {
+      "category": "apikey-specialty"
+    },
+    "mixedbread": {
+      "category": "apikey-specialty"
+    },
+    "firecrawl": {
+      "category": "apikey-specialty"
+    },
+    "jina-reader": {
+      "category": "apikey-specialty"
+    },
+    "tinyfish": {
+      "category": "apikey-specialty"
+    },
+    "auto": {
+      "category": "system"
+    }
+  },
+  "categories": {
+    "noauth": [
+      "opencode",
+      "duckduckgo-web",
+      "felo-web",
+      "theoldllm",
+      "chipotle",
+      "veoaifree-web",
+      "mimocode",
+      "auggie",
+      "notice"
+    ],
+    "oauth": [
+      "xai-oauth",
+      "grok-cli",
+      "qoder",
+      "qwen",
+      "agy",
+      "kiro",
+      "amazon-q",
+      "claude",
+      "antigravity",
+      "codex",
+      "github",
+      "gitlab-duo",
+      "cursor",
+      "zed",
+      "zed-hosted",
+      "trae",
+      "kimi-coding",
+      "kilocode",
+      "cline",
+      "clinepass",
+      "windsurf",
+      "devin-cli",
+      "codebuddy-cn"
+    ],
+    "web-cookie": [
+      "chatgpt-web",
+      "grok-web",
+      "gemini-web",
+      "perplexity-web",
+      "blackbox-web",
+      "muse-spark-web",
+      "claude-web",
+      "deepseek-web",
+      "copilot-web",
+      "copilot-m365-web",
+      "microsoft-designer-web",
+      "t3-web",
+      "inner-ai",
+      "adapta-web",
+      "lmarena",
+      "yuanbao-web",
+      "huggingchat",
+      "poe-web",
+      "venice-web",
+      "v0-vercel-web",
+      "kimi-web",
+      "doubao-web",
+      "qwen-web",
+      "gemini-business",
+      "zenmux-free",
+      "zai-web",
+      "notion-web"
+    ],
+    "local": [
+      "ollama-local",
+      "lm-studio",
+      "vllm",
+      "lemonade",
+      "llamafile",
+      "llama-cpp",
+      "triton",
+      "docker-model-runner",
+      "xinference",
+      "oobabooga",
+      "sdwebui",
+      "comfyui"
+    ],
+    "search": [
+      "perplexity-search",
+      "serper-search",
+      "brave-search",
+      "exa-search",
+      "tavily-search",
+      "google-pse-search",
+      "linkup-search",
+      "searchapi-search",
+      "youcom-search",
+      "searxng-search",
+      "ollama-search"
+    ],
+    "audio": [
+      "deepgram",
+      "assemblyai",
+      "elevenlabs",
+      "cartesia",
+      "playht",
+      "inworld",
+      "aws-polly",
+      "gladia",
+      "rev-ai",
+      "speechmatics"
+    ],
+    "upstream-proxy": [
+      "cliproxyapi",
+      "9router"
+    ],
+    "cloud-agent": [
+      "jules",
+      "devin",
+      "codex-cloud"
+    ],
+    "apikey-gateways": [
+      "charm-hyper",
+      "agentrouter",
+      "command-code",
+      "openrouter",
+      "requesty",
+      "dgrid",
+      "qiniu",
+      "orcarouter",
+      "api-airforce",
+      "crof",
+      "bazaarlink",
+      "synthetic",
+      "kilo-gateway",
+      "wafer",
+      "opencode-zen",
+      "opencode-go",
+      "dahl",
+      "puter",
+      "uncloseai",
+      "hackclub",
+      "freetheai",
+      "g4f-groq",
+      "g4f-gemini",
+      "g4f-pollinations",
+      "g4f-ollama",
+      "g4f-nvidia",
+      "vercel-ai-gateway",
+      "llm7",
+      "llamagate",
+      "gitlawb",
+      "gitlawb-gmi",
+      "nanogpt",
+      "aimlapi",
+      "novita",
+      "piapi",
+      "getgoapi",
+      "laozhang",
+      "thebai",
+      "bai",
+      "fenayai",
+      "empower",
+      "poe",
+      "chutes",
+      "factory",
+      "bluesminds",
+      "freemodel-dev",
+      "freeaiapikey",
+      "zenmux",
+      "openadapter",
+      "dit",
+      "tokenrouter",
+      "sumopod",
+      "x5lab",
+      "chenzk",
+      "kenari",
+      "notice"
+    ],
+    "apikey-frontier": [
+      "openai",
+      "reka",
+      "pioneer",
+      "anthropic",
+      "gemini",
+      "groq",
+      "blackbox",
+      "xai",
+      "mistral",
+      "perplexity",
+      "cohere",
+      "meta-llama",
+      "morph",
+      "galadriel",
+      "ai21",
+      "venice",
+      "codestral",
+      "upstage",
+      "maritalk",
+      "nous-research",
+      "arcee-ai",
+      "liquid",
+      "notice"
+    ],
+    "apikey-inference": [
+      "together",
+      "openvecta",
+      "fireworks",
+      "cerebras",
+      "nvidia",
+      "nebius",
+      "nube",
+      "siliconflow",
+      "hyperbolic",
+      "ollama-cloud",
+      "huggingface",
+      "github-models",
+      "deepinfra",
+      "lambda-ai",
+      "sambanova",
+      "nscale",
+      "baseten",
+      "publicai",
+      "featherless-ai",
+      "friendliai",
+      "wandb",
+      "inference-net",
+      "predibase",
+      "bytez",
+      "monsterapi",
+      "modelscope",
+      "byteplus",
+      "digitalocean",
+      "notice"
+    ],
+    "apikey-enterprise": [
+      "azure-openai",
+      "azure-ai",
+      "bedrock",
+      "watsonx",
+      "oci",
+      "sap",
+      "modal",
+      "vertex",
+      "vertex-partner",
+      "cloudflare-ai",
+      "scaleway",
+      "ovhcloud",
+      "heroku",
+      "databricks",
+      "datarobot",
+      "clarifai",
+      "snowflake"
+    ],
+    "apikey-regional": [
+      "qianfan",
+      "glm",
+      "glm-cn",
+      "glmt",
+      "bailian-coding-plan",
+      "kimi",
+      "kimi-coding-apikey",
+      "minimax",
+      "minimax-cn",
+      "deepseek",
+      "zai",
+      "alibaba",
+      "alibaba-cn",
+      "longcat",
+      "moonshot",
+      "volcengine",
+      "gigachat",
+      "xiaomi-mimo",
+      "baidu",
+      "tencent",
+      "iflytek",
+      "baichuan",
+      "yi",
+      "stepfun",
+      "coze",
+      "360ai",
+      "doubao",
+      "sensenova",
+      "sparkdesk",
+      "hcnsec",
+      "agnes",
+      "notice"
+    ],
+    "apikey-specialty": [
+      "nlpcloud",
+      "runwayml",
+      "kie",
+      "pollinations",
+      "haiper",
+      "leonardo",
+      "ideogram",
+      "freepik",
+      "suno",
+      "udio",
+      "v0-vercel",
+      "gitlab",
+      "voyage-ai",
+      "jina-ai",
+      "fal-ai",
+      "stability-ai",
+      "black-forest-labs",
+      "recraft",
+      "topaz",
+      "segmind",
+      "dify",
+      "nomic",
+      "mixedbread",
+      "firecrawl",
+      "jina-reader",
+      "tinyfish",
+      "notice"
+    ],
+    "system": [
+      "auto"
+    ]
+  }
+}

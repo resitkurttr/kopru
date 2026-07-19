@@ -15,6 +15,9 @@ except ImportError:
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.yaml"
 
+# OmniRoute'tan alınan 277 provider kataloğu (kategori bazlı)
+CATALOG_PATH = Path(__file__).resolve().parent / "providers_catalog.json"
+
 
 class ProviderConfig:
     """Tek bir AI sağlayıcı yapılandırması."""
@@ -144,3 +147,15 @@ def resolve_model_chain(providers: List[ProviderConfig],
                 chain.append(key)
 
     return chain
+
+
+def load_catalog() -> Dict:
+    """
+    OmniRoute'tan alınan 277 provider kataloğunu yükler.
+    Dönüş: {"providers": {id: {category}}, "categories": {cat: [ids]}}
+    """
+    if CATALOG_PATH.exists():
+        import json
+        with open(CATALOG_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"providers": {}, "categories": {}}

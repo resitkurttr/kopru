@@ -16,6 +16,7 @@ from enum import Enum
 import requests
 
 from .config import ProviderConfig, load_config, resolve_model_chain
+from .compression import Compressor, count_tokens_approx
 
 
 class Tier(str, Enum):
@@ -62,6 +63,7 @@ class RouteStats:
     failed: int = 0
     fallback_used: int = 0
     total_tokens: int = 0
+    total_tokens_saved: int = 0
     per_provider: Dict[str, int] = field(default_factory=dict)
     last_error: str = ""
 
@@ -77,6 +79,8 @@ class Router:
         # Circuit breaker: base_url -> CircuitState
         self._breakers: Dict[str, CircuitState] = {}
         self._lock = threading.Lock()
+        # Compression (OmniRoute RTK/Caveman esinli)
+        self.compressor = Compressor(strategy="simple", threshold=10, keep_recent=4)
 
     # ── Circuit breaker helpers ──────────────────────────────────────────
 
@@ -116,7 +120,16 @@ class Router:
 
     def chat(self, messages: List[Dict], model: str = "",
              tier: Optional[Tier] = None, **kwargs) -> str:
-        """Senkron sohbet — auto-fallback + circuit breaker."""
+        """Senkron sohbet — auto-fallback + circuit breaker + compression."""
+        # Compression uygula (token tasarrufu)
+        original_tokens = count_tokens_approx(messages)
+        messages = self.compressor.compress(messages, summarizer=kwargs.get("summarizer"))
+        compressed_tokens = count_tokens_approx(messages)
+        if original_tokens > 0:
+            savings = self.compressor.estimate_savings(original_tokens, compressed_tokens)
+            if savings > 0:
+                self.stats.total_tokens_saved = getattr(self.stats, "total_tokens_saved", 0) + (original_tokens - compressed_tokens)
+
         chain = self._resolve_chain(model, tier)
         if not chain:
             raise Exception("Köprü: aktif provider yok")
@@ -182,7 +195,16 @@ class Router:
 
     def chat_stream(self, messages: List[Dict], model: str = "",
                     tier: Optional[Tier] = None, **kwargs) -> Generator[str, None, None]:
-        """Streaming sohbet — auto-fallback + circuit breaker."""
+        """Streaming sohbet — auto-fallback + circuit breaker + compression."""
+        # Compression uygula
+        original_tokens = count_tokens_approx(messages)
+        messages = self.compressor.compress(messages, summarizer=kwargs.get("summarizer"))
+        compressed_tokens = count_tokens_approx(messages)
+        if original_tokens > 0:
+            savings = self.compressor.estimate_savings(original_tokens, compressed_tokens)
+            if savings > 0:
+                self.stats.total_tokens_saved += (original_tokens - compressed_tokens)
+
         chain = self._resolve_chain(model, tier)
         if not chain:
             yield "❌ Köprü: aktif provider yok"
@@ -332,6 +354,7 @@ class Router:
             "failed": self.stats.failed,
             "fallback_used": self.stats.fallback_used,
             "total_tokens": self.stats.total_tokens,
+            "total_tokens_saved": self.stats.total_tokens_saved,
             "per_provider": self.stats.per_provider,
             "last_error": self.stats.last_error,
             "providers": len(self.providers),

@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from .router import Router, Tier
-from .config import load_config
+from .config import load_config, load_catalog
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
@@ -114,6 +114,11 @@ def create_app(config_path: Optional[str] = None) -> FastAPI:
     @app.get("/api/providers")
     async def providers():
         return router.health()
+
+    @app.get("/api/providers-catalog")
+    async def providers_catalog():
+        """OmniRoute'tan alınan 277 provider kataloğu."""
+        return load_catalog()
 
     @app.get("/dashboard")
     async def dashboard():
