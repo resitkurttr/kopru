@@ -1,0 +1,72 @@
+{
+  "kopru/__init__.py": {
+    "mtime": 1784502857.5522494,
+    "ast_hash": "49d2b66eb79661648dfbfa66d7f7d8c6",
+    "semantic_hash": "49d2b66eb79661648dfbfa66d7f7d8c6"
+  },
+  "kopru/a2a.py": {
+    "mtime": 1784502857.5522494,
+    "ast_hash": "fd4f153800ad769c6a6840b219cbdaa5",
+    "semantic_hash": "fd4f153800ad769c6a6840b219cbdaa5"
+  },
+  "kopru/cli.py": {
+    "mtime": 1784502857.5562494,
+    "ast_hash": "d058e6056e4a9452ad4bfc0093e95145",
+    "semantic_hash": "d058e6056e4a9452ad4bfc0093e95145"
+  },
+  "kopru/compression.py": {
+    "mtime": 1784502857.5562494,
+    "ast_hash": "c664fe0e25e101db0968aa28bf686af0",
+    "semantic_hash": "c664fe0e25e101db0968aa28bf686af0"
+  },
+  "kopru/config.py": {
+    "mtime": 1784502857.5562494,
+    "ast_hash": "64d57c77f76ff301bdd4952d857ec926",
+    "semantic_hash": "64d57c77f76ff301bdd4952d857ec926"
+  },
+  "kopru/gateway.py": {
+    "mtime": 1784502857.5562494,
+    "ast_hash": "eb6b022b6f37e10ff48c97c7230149de",
+    "semantic_hash": "eb6b022b6f37e10ff48c97c7230149de"
+  },
+  "kopru/mcp.py": {
+    "mtime": 1784502857.5562494,
+    "ast_hash": "33a43931835d0b8311df8355e4fc81bb",
+    "semantic_hash": "33a43931835d0b8311df8355e4fc81bb"
+  },
+  "kopru/providers_catalog.json": {
+    "mtime": 1784502857.5562494,
+    "ast_hash": "c7f26629a4dfdf887abeb9679a9c8daf",
+    "semantic_hash": "c7f26629a4dfdf887abeb9679a9c8daf"
+  },
+  "kopru/router.py": {
+    "mtime": 1784502857.5562494,
+    "ast_hash": "92d50718a19369d3d5f0d54dd829ec43",
+    "semantic_hash": "92d50718a19369d3d5f0d54dd829ec43"
+  },
+  "README.md": {
+    "mtime": 1784502857.5522494,
+    "ast_hash": "f0e0ebf16e8e02f8fccb0d511b88bbdc",
+    "semantic_hash": "f0e0ebf16e8e02f8fccb0d511b88bbdc"
+  },
+  "config.yaml": {
+    "mtime": 1784502857.5522494,
+    "ast_hash": "55d177b5b258a8442eb4b860050af49f",
+    "semantic_hash": "55d177b5b258a8442eb4b860050af49f"
+  },
+  "index.html": {
+    "mtime": 1784502866.7802002,
+    "ast_hash": "a40a93bf7201e76d63b70500ab40a477",
+    "semantic_hash": "a40a93bf7201e76d63b70500ab40a477"
+  },
+  "requirements.txt": {
+    "mtime": 1784502857.5562494,
+    "ast_hash": "3d0536e0d2d95084454e4979ee15b5f6",
+    "semantic_hash": "3d0536e0d2d95084454e4979ee15b5f6"
+  },
+  "web/static/dashboard.html": {
+    "mtime": 1784502857.5642493,
+    "ast_hash": "a40a93bf7201e76d63b70500ab40a477",
+    "semantic_hash": "a40a93bf7201e76d63b70500ab40a477"
+  }
+}
