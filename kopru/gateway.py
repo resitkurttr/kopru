@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -29,6 +29,7 @@ from .database import (
 )
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
+ROOT_DIR = Path(__file__).resolve().parent.parent
 
 
 def create_app(config_path: Optional[str] = None) -> FastAPI:
@@ -90,14 +91,7 @@ def create_app(config_path: Optional[str] = None) -> FastAPI:
 
     @app.get("/")
     async def root():
-        return {
-            "service": "Köprü",
-            "version": "2.0.0",
-            "status": "running",
-            "docs": "/docs",
-            "dashboard": "/dashboard",
-            "api_base": "/v1",
-        }
+        return RedirectResponse(url="/dashboard")
 
     @app.get("/health")
     async def health():
@@ -320,10 +314,11 @@ def create_app(config_path: Optional[str] = None) -> FastAPI:
 
     @app.get("/dashboard")
     async def dashboard():
-        """Provider management + API key + usage dashboard."""
-        html_file = WEB_DIR / "static" / "dashboard.html"
-        if html_file.exists():
-            return HTMLResponse(html_file.read_text(encoding="utf-8"))
+        """Köprü — Provider management + API key + usage dashboard."""
+        # Tercih: root index.html (büyük dashboard), fallback: web/static/dashboard.html
+        for candidate in [ROOT_DIR / "index.html", WEB_DIR / "static" / "dashboard.html"]:
+            if candidate.exists():
+                return HTMLResponse(candidate.read_text(encoding="utf-8"))
         return HTMLResponse("<h1>Köprü Dashboard</h1><p>Yükleniyor...</p>")
 
     # ── MCP (Model Context Protocol) ─────────────────────────────────────
