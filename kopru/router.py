@@ -81,6 +81,13 @@ class Router:
         self._lock = threading.Lock()
         # Compression (OmniRoute RTK/Caveman esinli)
         self.compressor = Compressor(strategy="simple", threshold=10, keep_recent=4)
+        self._config_path = config_path
+        self.stats.last_provider = ""
+
+    def _reload_config(self):
+        """DB'den config'i yeniden yükle (provider ekleme/kaldırma sonrası)."""
+        self.config = load_config(self._config_path)
+        self.providers = self.config["providers"]
 
     # ── Circuit breaker helpers ──────────────────────────────────────────
 
@@ -326,6 +333,7 @@ class Router:
                 if p.base_url in base_url:
                     self.stats.per_provider[p.name] = \
                         self.stats.per_provider.get(p.name, 0) + 1
+                    self.stats.last_provider = p.name
         except Exception:
             pass
 
