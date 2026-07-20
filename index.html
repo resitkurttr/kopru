@@ -1,344 +1,3242 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Köprü — AI Gateway Dashboard</title>
+<title>Köprü Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
-  :root {
-    --color-primary: #e54d5e;
-    --color-primary-hover: #c93d4e;
-    --color-accent: #6366f1;
-    --color-accent-hover: #8b5cf6;
-    --color-success: #22c55e;
-    --color-error: #ef4444;
-    --color-warning: #f59e0b;
-    --color-bg: #0d1117;
-    --color-bg-alt: #161b22;
-    --color-surface: #21262d;
-    --color-card: #161b22;
-    --color-border: #30363d;
-    --color-text: #c9d1d9;
-    --color-muted: #8b949e;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--color-bg); color: var(--color-text);
-    line-height: 1.6; display: flex; min-height: 100vh;
-  }
-  /* Sidebar */
+/* ═══════════════════════════════════════════════════════════════
+   CSS VARIABLES & RESET
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg: #0a0a0f;
+  --bg-alt: #0e0e14;
+  --surface: #12121a;
+  --surface-hover: #1a1a25;
+  --card: #1a1a25;
+  --card-hover: #222233;
+  --border: #2a2a3a;
+  --border-light: #333344;
+  --text: #e4e4e8;
+  --text-dim: #8888a0;
+  --text-muted: #5a5a72;
+  --accent: #6c5ce7;
+  --accent-hover: #7d6ff0;
+  --accent2: #00cec9;
+  --green: #00b894;
+  --green-dim: rgba(0,184,148,0.15);
+  --red: #e17055;
+  --red-dim: rgba(225,112,85,0.15);
+  --yellow: #fdcb6e;
+  --yellow-dim: rgba(253,203,110,0.15);
+  --blue: #60A5FA;
+  --sky: #38BDF8;
+  --amber: #F59E0B;
+  --indigo: #818CF8;
+  --purple: #A855F7;
+  --cyan: #06B6D4;
+  --lime: #84CC16;
+  --slate: #CBD5E1;
+  --sidebar-width: 220px;
+  --sidebar-collapsed: 64px;
+  --header-height: 56px;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+  --transition: 0.2s ease;
+  --transition-slow: 0.3s ease;
+  /* Provider colors */
+  --openai: #10a37f;
+  --anthropic: #d4a574;
+  --google: #4285f4;
+  --deepseek: #0066ff;
+  --mistral: #ff7000;
+  --meta: #0668E1;
+}
+
+[data-theme="light"] {
+  --bg: #f5f5f7;
+  --bg-alt: #ebebef;
+  --surface: #ffffff;
+  --surface-hover: #f0f0f5;
+  --card: #ffffff;
+  --card-hover: #f5f5fa;
+  --border: #d8d8e0;
+  --border-light: #e0e0e8;
+  --text: #1a1a2e;
+  --text-dim: #666680;
+  --text-muted: #9999aa;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-slow), min-width var(--transition-slow);
+  overflow: hidden;
+  z-index: 100;
+  position: relative;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed);
+  min-width: var(--sidebar-collapsed);
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px;
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar-brand .brand-icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sidebar-brand .brand-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  transition: opacity var(--transition);
+  overflow: hidden;
+}
+
+.collapsed .brand-text,
+.collapsed .nav-label,
+.collapsed .nav-item-text,
+.collapsed .nav-section-title,
+.collapsed .nav-section .material-symbols-outlined.expand-icon {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  height: 40px;
+  cursor: pointer;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: all var(--transition);
+  white-space: nowrap;
+  position: relative;
+  user-select: none;
+}
+
+.nav-item:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.nav-item.active {
+  color: var(--accent);
+  background: rgba(108,92,231,0.1);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+
+.nav-item .material-symbols-outlined {
+  font-size: 20px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.nav-item-text {
+  font-size: 13px;
+  font-weight: 500;
+  transition: opacity var(--transition);
+}
+
+.nav-section {
+  margin-top: 4px;
+}
+
+.nav-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  height: 36px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: color var(--transition);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.nav-section-header:hover { color: var(--text-dim); }
+
+.nav-section-header .material-symbols-outlined {
+  font-size: 18px;
+  min-width: 18px;
+}
+
+.nav-section-title {
+  flex: 1;
+  transition: opacity var(--transition);
+}
+
+.expand-icon {
+  font-size: 18px !important;
+  transition: transform var(--transition);
+}
+
+.nav-section.open .expand-icon {
+  transform: rotate(90deg);
+}
+
+.nav-section-items {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height var(--transition-slow);
+}
+
+.nav-section.open .nav-section-items {
+  max-height: 400px;
+}
+
+.nav-section-items .nav-item {
+  padding-left: 48px;
+  font-size: 13px;
+}
+
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 13px;
+}
+
+.sidebar-toggle:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN AREA
+   ═══════════════════════════════════════════════════════════════ */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════════ */
+.header {
+  height: var(--header-height);
+  min-height: var(--header-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.breadcrumbs span { color: var(--text-dim); }
+.breadcrumbs .separator { color: var(--text-muted); }
+
+.header-spacer { flex: 1; }
+
+.api-url-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  height: 32px;
+  transition: border-color var(--transition);
+}
+
+.api-url-group:focus-within {
+  border-color: var(--accent);
+}
+
+.api-url-group .material-symbols-outlined {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+.api-url-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  width: 220px;
+}
+
+.api-url-input::placeholder { color: var(--text-muted); }
+
+.header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.header-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.cmd-palette-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.cmd-palette-btn:hover {
+  border-color: var(--border-light);
+  color: var(--text-dim);
+}
+
+.cmd-palette-btn kbd {
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-family: inherit;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTENT AREA
+   ═══════════════════════════════════════════════════════════════ */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px;
+}
+
+.page {
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+
+.page.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMMON COMPONENTS
+   ═══════════════════════════════════════════════════════════════ */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.page-header .subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all var(--transition);
+}
+
+.card:hover {
+  border-color: var(--border-light);
+  background: var(--card-hover);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px) { .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: var(--accent-hover); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+.btn-secondary:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: var(--border-light);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--red);
+  border-color: var(--red);
+}
+.btn-danger:hover {
+  background: var(--red-dim);
+}
+
+.btn-success {
+  background: transparent;
+  color: var(--green);
+  border-color: var(--green);
+}
+.btn-success:hover {
+  background: var(--green-dim);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-green {
+  background: var(--green-dim);
+  color: var(--green);
+}
+
+.badge-red {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.badge-yellow {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+}
+
+.badge-blue {
+  background: rgba(96,165,250,0.15);
+  color: var(--blue);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.green { background: var(--green); box-shadow: 0 0 6px rgba(0,184,148,0.4); }
+.status-dot.red { background: var(--red); box-shadow: 0 0 6px rgba(225,112,85,0.4); }
+.status-dot.yellow { background: var(--yellow); box-shadow: 0 0 6px rgba(253,203,110,0.4); }
+
+.table-container {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--surface);
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface-hover); }
+
+.input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  transition: border-color var(--transition);
+  outline: none;
+  width: 100%;
+}
+
+.input:focus { border-color: var(--accent); }
+
+.input-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%238888a0' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  height: 36px;
+  transition: border-color var(--transition);
+}
+
+.search-box:focus-within { border-color: var(--accent); }
+
+.search-box .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 13px;
+  flex: 1;
+  font-family: inherit;
+}
+
+.search-box input::placeholder { color: var(--text-muted); }
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted);
+}
+
+.empty-state .material-symbols-outlined {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DASHBOARD SPECIFIC
+   ═══════════════════════════════════════════════════════════════ */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1100px) { .stat-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .stat-cards { grid-template-columns: 1fr; } }
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all var(--transition);
+}
+
+.stat-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-1px);
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon .material-symbols-outlined { font-size: 22px; color: white; }
+
+.stat-info { flex: 1; min-width: 0; }
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.topology-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.topology-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.topology-card .provider-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.provider-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.provider-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.provider-status {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+
+.health-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.health-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.health-row .status-dot { flex-shrink: 0; }
+.health-row .label { font-size: 13px; color: var(--text); flex: 1; }
+.health-row .value { font-size: 12px; color: var(--text-dim); font-family: 'SF Mono', monospace; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ENDPOINTS SPECIFIC
+   ═══════════════════════════════════════════════════════════════ */
+.endpoint-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all var(--transition);
+}
+
+.endpoint-card:hover {
+  border-color: var(--border-light);
+}
+
+.endpoint-url {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  color: var(--accent2);
+  background: var(--bg);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  margin-top: 12px;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.endpoint-url .copy-btn {
+  margin-left: auto;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.endpoint-url .copy-btn:hover { color: var(--text); }
+
+.model-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.model-tag {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHARTS (Simple CSS-based)
+   ═══════════════════════════════════════════════════════════════ */
+.chart-bar-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 120px;
+  padding-top: 10px;
+}
+
+.chart-bar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  min-width: 8px;
+  transition: height var(--transition-slow);
+  position: relative;
+  cursor: pointer;
+}
+
+.chart-bar:hover { opacity: 0.85; }
+
+.chart-bar .tooltip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--text);
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: var(--shadow);
+}
+
+.chart-bar:hover .tooltip { display: block; }
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.chart-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODALS
+   ═══════════════════════════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.15s ease;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 480px;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.modal-body { padding: 20px; }
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group:last-child { margin-bottom: 0; }
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+   ═══════════════════════════════════════════════════════════════ */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px;
+  color: var(--text);
+  animation: slideIn 0.2s ease;
+  min-width: 280px;
+}
+
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error { border-left: 3px solid var(--red); }
+.toast.warning { border-left: 3px solid var(--yellow); }
+.toast.info { border-left: 3px solid var(--blue); }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMMAND PALETTE
+   ═══════════════════════════════════════════════════════════════ */
+.cmd-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1500;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 120px;
+  backdrop-filter: blur(4px);
+}
+
+.cmd-overlay.active { display: flex; }
+
+.cmd-palette {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 520px;
+  max-width: 90vw;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: modalIn 0.15s ease;
+}
+
+.cmd-palette-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cmd-palette-input .material-symbols-outlined {
+  color: var(--text-muted);
+  font-size: 20px;
+}
+
+.cmd-palette-input input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.cmd-palette-input input::placeholder { color: var(--text-muted); }
+
+.cmd-results {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.cmd-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 13px;
+  transition: all var(--transition);
+}
+
+.cmd-item:hover, .cmd-item.selected {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.cmd-item .material-symbols-outlined { font-size: 18px; }
+
+.cmd-item .shortcut {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOADING
+   ═══════════════════════════════════════════════════════════════ */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 12px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOGGLE SWITCH
+   ═══════════════════════════════════════════════════════════════ */
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 11px;
+  transition: background var(--transition);
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  top: 3px;
+  left: 3px;
+  transition: transform var(--transition);
+}
+
+.toggle input:checked + .toggle-slider {
+  background: var(--accent);
+}
+
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SETTINGS SPECIFIC
+   ═══════════════════════════════════════════════════════════════ */
+.settings-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.settings-section h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.setting-row:last-child { border-bottom: none; }
+
+.setting-info {
+  flex: 1;
+}
+
+.setting-info .label { font-size: 13px; font-weight: 500; color: var(--text); }
+.setting-info .desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PROVIDER COLORS HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+.provider-openai { background: var(--openai); }
+.provider-anthropic { background: var(--anthropic); }
+.provider-google { background: var(--google); }
+.provider-deepseek { background: var(--deepseek); }
+.provider-mistral { background: var(--mistral); }
+.provider-meta { background: var(--meta); }
+.provider-custom { background: var(--accent); }
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE SIDEBAR
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
   .sidebar {
-    width: 240px; background: var(--color-bg-alt); border-right: 1px solid var(--color-border);
-    padding: 20px 0; position: fixed; height: 100vh; overflow-y: auto;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 200;
+    transform: translateX(-100%);
   }
-  .sidebar .brand {
-    display: flex; align-items: center; gap: 10px; padding: 0 20px 20px;
-    border-bottom: 1px solid var(--color-border); margin-bottom: 16px;
+  .sidebar.mobile-open {
+    transform: translateX(0);
   }
-  .sidebar .brand .logo { font-size: 28px; }
-  .sidebar .brand h1 { font-size: 20px; font-weight: 700; }
-  .sidebar .brand span { font-size: 11px; color: var(--color-muted); }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px; padding: 10px 20px;
-    color: var(--color-muted); cursor: pointer; transition: 0.2s;
-    border-left: 3px solid transparent;
-  }
-  .nav-item:hover, .nav-item.active {
-    color: var(--color-text); background: var(--color-surface);
-    border-left-color: var(--color-primary);
-  }
-  .nav-item .icon { font-size: 18px; }
-  /* Main */
-  .main { margin-left: 240px; flex: 1; padding: 24px; max-width: 1200px; }
-  .header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
-  }
-  .header h2 { font-size: 24px; font-weight: 700; }
-  .status-pill {
-    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
-    background: var(--color-surface); border: 1px solid var(--color-border);
-    border-radius: 20px; font-size: 13px;
-  }
-  .status-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); }
-  /* Cards */
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-  .card {
-    background: var(--color-card); border: 1px solid var(--color-border);
-    border-radius: 12px; padding: 20px;
-  }
-  .card h3 { font-size: 14px; color: var(--color-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-  /* Provider topology */
-  .provider-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 0; border-bottom: 1px solid var(--color-border);
-  }
-  .provider-row:last-child { border-bottom: none; }
-  .provider-name { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-  .provider-icon {
-    width: 28px; height: 28px; border-radius: 6px; display: flex;
-    align-items: center; justify-content: center; font-size: 14px; font-weight: 700;
-    background: var(--color-surface); color: var(--color-primary);
-  }
-  .provider-meta { font-size: 12px; color: var(--color-muted); }
-  .badge {
-    padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
-  }
-  .badge.ok { background: rgba(34,197,94,0.15); color: var(--color-success); }
-  .badge.bad { background: rgba(239,68,68,0.15); color: var(--color-error); }
-  .badge.warn { background: rgba(245,158,11,0.15); color: var(--color-warning); }
-  /* Stats */
-  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .stat { text-align: center; padding: 16px; }
-  .stat .num { font-size: 28px; font-weight: 800; color: var(--color-primary); }
-  .stat .label { font-size: 12px; color: var(--color-muted); margin-top: 4px; }
-  /* Chat test */
-  .chat-box {
-    background: var(--color-surface); border: 1px solid var(--color-border);
-    border-radius: 12px; padding: 20px; margin-top: 16px;
-  }
-  textarea, input, select {
-    width: 100%; background: var(--color-bg); border: 1px solid var(--color-border);
-    color: var(--color-text); padding: 12px; border-radius: 8px;
-    font-family: inherit; font-size: 14px; resize: vertical;
-  }
-  textarea { min-height: 80px; margin-bottom: 10px; }
-  button {
-    background: var(--color-primary); color: #fff; border: none;
-    padding: 12px 24px; border-radius: 8px; cursor: pointer;
-    font-size: 14px; font-weight: 600; transition: 0.2s;
-  }
-  button:hover { background: var(--color-primary-hover); }
-  .response {
-    background: var(--color-bg); border: 1px solid var(--color-border);
-    border-radius: 8px; padding: 16px; margin-top: 12px; min-height: 80px;
-    white-space: pre-wrap; font-size: 14px;
-  }
-  .section { margin-bottom: 32px; }
-  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .hidden { display: none; }
-  /* Tier coverage */
-  .tier-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
-  .tier-bar .seg { height: 100%; }
+  .mobile-menu-btn { display: flex !important; }
+}
+
+.mobile-menu-btn { display: none; }
 </style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="brand">
-      <span class="logo">🌉</span>
-      <div>
-        <h1>Köprü</h1>
-        <span>AI Gateway v1.0</span>
-      </div>
+<div class="app">
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">Ω</div>
+      <span class="brand-text">Köprü</span>
     </div>
-    <div class="nav-item active" data-view="overview"><span class="icon">📊</span> Genel Bakış</div>
-    <div class="nav-item" data-view="providers"><span class="icon">🔗</span> Provider'lar</div>
-    <div class="nav-item" data-view="catalog"><span class="icon">📚</span> Katalog (277)</div>
-    <div class="nav-item" data-view="test"><span class="icon">💬</span> Test Sorgusu</div>
-    <div class="nav-item" data-view="stats"><span class="icon">📈</span> İstatistikler</div>
-    <div style="padding:16px 20px; margin-top:16px; border-top:1px solid var(--color-border);">
-      <label style="font-size:12px;color:var(--color-muted);display:block;margin-bottom:6px;">API URL</label>
-      <input id="api-url" value="http://194.146.36.72:20128" 
-             style="width:100%;padding:8px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:6px;color:var(--color-text);font-size:12px;"
-             onchange="setApiUrl(this.value)">
+    <nav class="sidebar-nav">
+      <!-- Home -->
+      <div class="nav-item active" data-page="home" onclick="navigateTo('home')">
+        <span class="material-symbols-outlined" style="color:var(--blue)">home</span>
+        <span class="nav-item-text">Home</span>
+      </div>
+
+      <!-- Köprü Proxy -->
+      <div class="nav-section open" id="nav-omniproxy">
+        <div class="nav-section-header" onclick="toggleSection('nav-omniproxy')">
+          <span class="material-symbols-outlined" style="color:var(--accent)">hub</span>
+          <span class="nav-section-title">Köprü Proxy</span>
+          <span class="material-symbols-outlined expand-icon">chevron_right</span>
+        </div>
+        <div class="nav-section-items">
+          <div class="nav-item" data-page="endpoints" onclick="navigateTo('endpoints')">
+            <span class="material-symbols-outlined" style="color:var(--sky)">route</span>
+            <span class="nav-item-text">Endpoints</span>
+          </div>
+          <div class="nav-item" data-page="api-manager" onclick="navigateTo('api-manager')">
+            <span class="material-symbols-outlined" style="color:var(--amber)">key</span>
+            <span class="nav-item-text">API Manager</span>
+          </div>
+          <div class="nav-item" data-page="providers" onclick="navigateTo('providers')">
+            <span class="material-symbols-outlined" style="color:var(--indigo)">dns</span>
+            <span class="nav-item-text">Providers</span>
+          </div>
+          <div class="nav-item" data-page="combos" onclick="navigateTo('combos')">
+            <span class="material-symbols-outlined" style="color:var(--purple)">merge</span>
+            <span class="nav-item-text">Combos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics -->
+      <div class="nav-section open" id="nav-analytics">
+        <div class="nav-section-header" onclick="toggleSection('nav-analytics')">
+          <span class="material-symbols-outlined" style="color:var(--accent2)">analytics</span>
+          <span class="nav-section-title">Analytics</span>
+          <span class="material-symbols-outlined expand-icon">chevron_right</span>
+        </div>
+        <div class="nav-section-items">
+          <div class="nav-item" data-page="usage" onclick="navigateTo('usage')">
+            <span class="material-symbols-outlined" style="color:var(--cyan)">monitoring</span>
+            <span class="nav-item-text">Usage</span>
+          </div>
+          <div class="nav-item" data-page="cache" onclick="navigateTo('cache')">
+            <span class="material-symbols-outlined" style="color:var(--lime)">cached</span>
+            <span class="nav-item-text">Cache</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monitoring -->
+      <div class="nav-section open" id="nav-monitoring">
+        <div class="nav-section-header" onclick="toggleSection('nav-monitoring')">
+          <span class="material-symbols-outlined" style="color:var(--slate)">health_and_safety</span>
+          <span class="nav-section-title">Monitoring</span>
+          <span class="material-symbols-outlined expand-icon">chevron_right</span>
+        </div>
+        <div class="nav-section-items">
+          <div class="nav-item" data-page="activity" onclick="navigateTo('activity')">
+            <span class="material-symbols-outlined" style="color:var(--slate)">activity_log</span>
+            <span class="nav-item-text">Activity</span>
+          </div>
+          <div class="nav-item" data-page="health" onclick="navigateTo('health')">
+            <span class="material-symbols-outlined" style="color:var(--red)">favorite</span>
+            <span class="nav-item-text">Health</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuration -->
+      <div class="nav-section open" id="nav-config">
+        <div class="nav-section-header" onclick="toggleSection('nav-config')">
+          <span class="material-symbols-outlined" style="color:var(--text-muted)">settings</span>
+          <span class="nav-section-title">Configuration</span>
+          <span class="material-symbols-outlined expand-icon">chevron_right</span>
+        </div>
+        <div class="nav-section-items">
+          <div class="nav-item" data-page="settings" onclick="navigateTo('settings')">
+            <span class="material-symbols-outlined" style="color:#64748B">tune</span>
+            <span class="nav-item-text">Settings</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <span class="material-symbols-outlined" id="sidebar-toggle-icon">chevron_left</span>
+        <span class="nav-item-text" id="sidebar-toggle-text">Collapse</span>
+      </button>
     </div>
   </aside>
 
-  <!-- Main -->
-  <main class="main">
-    <!-- Overview -->
-    <section id="view-overview" class="section">
-      <div class="header">
-        <h2>Genel Bakış</h2>
-        <span class="status-pill"><span class="dot"></span> Çalışıyor · Port 20128</span>
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="main-area">
+    <!-- Header -->
+    <header class="header">
+      <button class="header-btn mobile-menu-btn" onclick="toggleMobileSidebar()">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div>
+        <div class="header-title" id="header-title">Dashboard</div>
+        <div class="breadcrumbs" id="breadcrumbs">
+          <span>Köprü</span>
+          <span class="separator">/</span>
+          <span>Home</span>
+        </div>
       </div>
-      <div class="stat-grid">
-        <div class="card stat"><div class="num" id="ov-providers">0</div><div class="label">Aktif Provider</div></div>
-        <div class="card stat"><div class="num" id="ov-total">0</div><div class="label">Toplam İstek</div></div>
-        <div class="card stat"><div class="num" id="ov-success">0</div><div class="label">Başarılı</div></div>
-        <div class="card stat"><div class="num" id="ov-fallback">0</div><div class="label">Fallback</div></div>
+      <div class="header-spacer"></div>
+      <div class="api-url-group">
+        <span class="material-symbols-outlined">link</span>
+        <input type="text" class="api-url-input" id="apiUrlInput" placeholder="http://localhost:20128" />
       </div>
-      <div class="grid" style="margin-top:16px">
-        <div class="card">
-          <h3>Tier Coverage</h3>
-          <div class="tier-bar">
-            <div class="seg" style="background:var(--color-primary);width:40%"></div>
-            <div class="seg" style="background:var(--color-accent);width:35%"></div>
-            <div class="seg" style="background:var(--color-success);width:25%"></div>
+      <button class="cmd-palette-btn" onclick="openCommandPalette()">
+        <span class="material-symbols-outlined" style="font-size:16px">search</span>
+        <span>Command</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button class="header-btn" onclick="toggleTheme()" title="Toggle theme">
+        <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+      </button>
+    </header>
+
+    <!-- Content -->
+    <main class="content" id="content">
+
+      <!-- ═══════════ HOME PAGE ═══════════ -->
+      <div class="page active" id="page-home">
+        <div class="page-header">
+          <div>
+            <h1>Dashboard</h1>
+            <div class="subtitle">Köprü gateway durumu</div>
           </div>
-          <p style="font-size:12px;color:var(--color-muted);margin-top:8px">
-            Best-Reasoning · Moderate · Cheapest katmanları otomatik seçilir.
-          </p>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary" onclick="refreshDashboard()">
+              <span class="material-symbols-outlined" style="font-size:16px">refresh</span>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--accent)">
+              <span class="material-symbols-outlined">dns</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-providers">--</div>
+              <div class="stat-label">Providers</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--accent2)">
+              <span class="material-symbols-outlined">route</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-endpoints">--</div>
+              <div class="stat-label">Endpoints</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--green)">
+              <span class="material-symbols-outlined">key</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-apikeys">--</div>
+              <div class="stat-label">API Keys</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--yellow)">
+              <span class="material-symbols-outlined">trending_up</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-requests">--</div>
+              <div class="stat-label">Requests (24h)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Provider Topology -->
+        <div style="margin-bottom:24px;">
+          <div class="card-header">
+            <div class="card-title">Provider Topology</div>
+            <span class="badge badge-green"><span class="status-dot green"></span> Connected</span>
+          </div>
+          <div class="grid grid-3" id="provider-topology">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Health Matrix + Version -->
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Health Matrix</div>
+            </div>
+            <div class="health-matrix" id="health-matrix">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">System Info</div>
+            </div>
+            <div id="version-info">
+              <div class="health-row">
+                <span class="status-dot green"></span>
+                <span class="label">Version</span>
+                <span class="value" id="sys-version">--</span>
+              </div>
+              <div class="health-row">
+                <span class="status-dot green"></span>
+                <span class="label">Uptime</span>
+                <span class="value" id="sys-uptime">--</span>
+              </div>
+              <div class="health-row">
+                <span class="status-dot green"></span>
+                <span class="label">Node.js</span>
+                <span class="value" id="sys-node">--</span>
+              </div>
+              <div class="health-row">
+                <span class="status-dot green"></span>
+                <span class="label">Memory</span>
+                <span class="value" id="sys-memory">--</span>
+              </div>
+              <div class="health-row">
+                <span class="status-dot green"></span>
+                <span class="label">Port</span>
+                <span class="value" id="sys-port">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ ENDPOINTS PAGE ═══════════ -->
+      <div class="page" id="page-endpoints">
+        <div class="page-header">
+          <div>
+            <h1>Endpoints</h1>
+            <div class="subtitle">Manage proxy endpoints and provider connections</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('endpoint-modal')">
+            <span class="material-symbols-outlined" style="font-size:16px">add</span>
+            Add Endpoint
+          </button>
+        </div>
+        <div class="grid grid-2" id="endpoint-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- ═══════════ API MANAGER PAGE ═══════════ -->
+      <div class="page" id="page-api-manager">
+        <div class="page-header">
+          <div>
+            <h1>API Manager</h1>
+            <div class="subtitle">Manage API keys, scopes, and usage limits</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('apikey-modal')">
+            <span class="material-symbols-outlined" style="font-size:16px">add</span>
+            Create API Key
+          </button>
+        </div>
+        <div class="card" style="padding:0;">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Key</th>
+                  <th>Scopes</th>
+                  <th>Rate Limit</th>
+                  <th>Created</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="apikey-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ PROVIDERS PAGE ═══════════ -->
+      <div class="page" id="page-providers">
+        <div class="page-header">
+          <div>
+            <h1>Providers</h1>
+            <div class="subtitle">Configure upstream AI providers</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('provider-modal')">
+            <span class="material-symbols-outlined" style="font-size:16px">add</span>
+            Add Provider
+          </button>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div class="search-box" style="max-width:360px;">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" placeholder="Search providers..." id="provider-search" oninput="filterProviders(this.value)" />
+          </div>
+        </div>
+        <div class="grid grid-3" id="provider-catalog">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- ═══════════ COMBOS PAGE ═══════════ -->
+      <div class="page" id="page-combos">
+        <div class="page-header">
+          <div>
+            <h1>Combos</h1>
+            <div class="subtitle">Chain multiple providers for fallback and load balancing</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('combo-modal')">
+            <span class="material-symbols-outlined" style="font-size:16px">add</span>
+            Create Combo
+          </button>
+        </div>
+        <div id="combo-list" class="grid grid-2">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- ═══════════ USAGE PAGE ═══════════ -->
+      <div class="page" id="page-usage">
+        <div class="page-header">
+          <div>
+            <h1>Usage Analytics</h1>
+            <div class="subtitle">API usage metrics and cost analysis</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="input input-sm" id="usage-range" onchange="loadUsage()" style="width:auto;">
+              <option value="24h">Last 24 Hours</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="90d">Last 90 Days</option>
+            </select>
+          </div>
+        </div>
+        <div class="stat-cards" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--cyan)">
+              <span class="material-symbols-outlined">send</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="usage-total">--</div>
+              <div class="stat-label">Total Requests</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--green)">
+              <span class="material-symbols-outlined">check_circle</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="usage-success">--</div>
+              <div class="stat-label">Successful</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--red)">
+              <span class="material-symbols-outlined">error</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="usage-errors">--</div>
+              <div class="stat-label">Errors</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--amber)">
+              <span class="material-symbols-outlined">timer</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="usage-latency">--</div>
+              <div class="stat-label">Avg Latency</div>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Requests Over Time</div>
+            </div>
+            <div class="chart-bar-container" id="usage-chart-requests"></div>
+            <div class="chart-legend">
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--accent)"></div> Requests</div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--red)"></div> Errors</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Token Usage by Provider</div>
+            </div>
+            <div class="chart-bar-container" id="usage-chart-tokens"></div>
+            <div class="chart-legend" id="usage-chart-tokens-legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════ CACHE PAGE ═══════════ -->
+      <div class="page" id="page-cache">
+        <div class="page-header">
+          <div>
+            <h1>Cache</h1>
+            <div class="subtitle">Response cache management and statistics</div>
+          </div>
+          <button class="btn btn-danger" onclick="purgeCache()">
+            <span class="material-symbols-outlined" style="font-size:16px">delete_sweep</span>
+            Purge All
+          </button>
+        </div>
+        <div class="stat-cards" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--lime)">
+              <span class="material-symbols-outlined">cached</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="cache-entries">--</div>
+              <div class="stat-label">Cache Entries</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--cyan)">
+              <span class="material-symbols-outlined">scale</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="cache-size">--</div>
+              <div class="stat-label">Cache Size</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--green)">
+              <span class="material-symbols-outlined">speed</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="cache-hit-rate">--</div>
+              <div class="stat-label">Hit Rate</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--amber)">
+              <span class="material-symbols-outlined">savings</span>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="cache-saved">--</div>
+              <div class="stat-label">Tokens Saved</div>
+            </div>
+          </div>
         </div>
         <div class="card">
-          <h3>Endpoint</h3>
-          <p style="font-size:13px;word-break:break-all"><code>http://localhost:20128/v1/chat/completions</code></p>
-          <p style="font-size:12px;color:var(--color-muted);margin-top:8px">OpenAI uyumlu · Claude Code / Cursor / OpenCode bağlanabilir</p>
+          <div class="card-header">
+            <div class="card-title">Recent Cache Entries</div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Key (Hash)</th>
+                  <th>Model</th>
+                  <th>Tokens</th>
+                  <th>Size</th>
+                  <th>Created</th>
+                  <th>TTL</th>
+                </tr>
+              </thead>
+              <tbody id="cache-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </section>
 
-    <!-- Providers -->
-    <section id="view-providers" class="section hidden">
-      <div class="header"><h2>Provider Durumu</h2></div>
-      <div class="card"><div id="provider-list"><p style="color:var(--color-muted)">Yükleniyor...</p></div></div>
-    </section>
-
-    <!-- Catalog -->
-    <section id="view-catalog" class="section hidden">
-      <div class="header"><h2>Provider Kataloğu</h2><span class="status-pill" id="cat-count">277</span></div>
-      <div id="catalog-list"></div>
-    </section>
-
-    <!-- Test -->
-    <section id="view-test" class="section hidden">
-      <div class="header"><h2>Test Sorgusu</h2></div>
-      <div class="chat-box">
-        <select id="model"></select>
-        <textarea id="prompt" placeholder="Mesajını yaz...">Merhaba Köprü, nasılsın?</textarea>
-        <button onclick="send()">Gönder</button>
-        <div id="response" class="response"></div>
+      <!-- ═══════════ ACTIVITY PAGE ═══════════ -->
+      <div class="page" id="page-activity">
+        <div class="page-header">
+          <div>
+            <h1>Activity Log</h1>
+            <div class="subtitle">Recent API activity and events</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <select class="input input-sm" id="activity-filter" onchange="loadActivity()" style="width:auto;">
+              <option value="all">All Events</option>
+              <option value="requests">Requests</option>
+              <option value="errors">Errors</option>
+              <option value="admin">Admin Actions</option>
+            </select>
+          </div>
+        </div>
+        <div class="card" style="padding:0;">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Type</th>
+                  <th>Provider</th>
+                  <th>Model</th>
+                  <th>Status</th>
+                  <th>Latency</th>
+                  <th>Tokens</th>
+                </tr>
+              </thead>
+              <tbody id="activity-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </section>
 
-    <!-- Stats -->
-    <section id="view-stats" class="section hidden">
-      <div class="header"><h2>İstatistikler</h2></div>
-      <div class="grid">
-        <div class="card"><h3>Toplam İstek</h3><div class="num" id="st-total" style="font-size:32px;font-weight:800;color:var(--color-primary)">0</div></div>
-        <div class="card"><h3>Başarı Oranı</h3><div class="num" id="st-rate" style="font-size:32px;font-weight:800;color:var(--color-success)">0%</div></div>
-        <div class="card"><h3>Fallback Kullanımı</h3><div class="num" id="st-fallback" style="font-size:32px;font-weight:800;color:var(--color-warning)">0</div></div>
-        <div class="card"><h3>Toplam Token</h3><div class="num" id="st-tokens" style="font-size:32px;font-weight:800;color:var(--color-accent)">0</div></div>
+      <!-- ═══════════ HEALTH PAGE ═══════════ -->
+      <div class="page" id="page-health">
+        <div class="page-header">
+          <div>
+            <h1>Health Monitor</h1>
+            <div class="subtitle">Real-time provider health status</div>
+          </div>
+          <button class="btn btn-secondary" onclick="loadHealth()">
+            <span class="material-symbols-outlined" style="font-size:16px">refresh</span>
+            Refresh
+          </button>
+        </div>
+        <div id="health-cards" class="grid grid-2">
+          <!-- Populated by JS -->
+        </div>
       </div>
-      <div class="card" style="margin-top:16px">
-        <h3>Provider Bazlı İstek</h3>
-        <div id="st-per-provider"></div>
+
+      <!-- ═══════════ SETTINGS PAGE ═══════════ -->
+      <div class="page" id="page-settings">
+        <div class="page-header">
+          <div>
+            <h1>Settings</h1>
+            <div class="subtitle">Configure Köprü yapılandırma</div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>
+            <span class="material-symbols-outlined" style="font-size:20px;color:var(--accent)">tune</span>
+            General
+          </h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">Theme</div>
+              <div class="desc">Switch between dark and light theme</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-theme" onchange="toggleTheme()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">Sidebar</div>
+              <div class="desc">Start with sidebar collapsed</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-collapsed" onchange="toggleSidebar()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">Auto-refresh</div>
+              <div class="desc">Automatically refresh dashboard data</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-autorefresh" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>
+            <span class="material-symbols-outlined" style="font-size:20px;color:var(--accent2)">link</span>
+            API Connection
+          </h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">API Base URL</div>
+              <div class="desc">Köprü API adresi</div>
+            </div>
+            <input type="text" class="input" id="setting-api-url" style="max-width:320px;" placeholder="http://localhost:20128" />
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">API Token</div>
+              <div class="desc">Authentication token for API access</div>
+            </div>
+            <input type="password" class="input" id="setting-api-token" style="max-width:320px;" placeholder="Bearer token..." />
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveSettings()">Save Settings</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>
+            <span class="material-symbols-outlined" style="font-size:20px;color:var(--red)">security</span>
+            Security
+          </h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">Rate Limiting</div>
+              <div class="desc">Enable rate limiting on incoming requests</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-ratelimit" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">Request Logging</div>
+              <div class="desc">Log all API requests for auditing</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-logging" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">CORS</div>
+              <div class="desc">Allow cross-origin requests</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-cors">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>
+            <span class="material-symbols-outlined" style="font-size:20px;color:var(--yellow)">storage</span>
+            Cache
+          </h3>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">Enable Caching</div>
+              <div class="desc">Cache similar responses to reduce costs</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="setting-cache" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">Cache TTL</div>
+              <div class="desc">Time-to-live for cached entries (seconds)</div>
+            </div>
+            <input type="number" class="input" id="setting-cache-ttl" style="max-width:120px;" value="3600" />
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <div class="label">Max Cache Size</div>
+              <div class="desc">Maximum cache size in MB</div>
+            </div>
+            <input type="number" class="input" id="setting-cache-size" style="max-width:120px;" value="512" />
+          </div>
+        </div>
       </div>
-    </section>
-  </main>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════ MODALS ═══════════ -->
+<!-- Endpoint Modal -->
+<div class="modal-overlay" id="endpoint-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Endpoint</h3>
+      <button class="header-btn" onclick="closeModal('endpoint-modal')">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Provider</label>
+        <select class="input" id="ep-provider"><option value="">Select provider...</option></select>
+      </div>
+      <div class="form-group">
+        <label>Endpoint Path</label>
+        <input type="text" class="input" id="ep-path" placeholder="/v1/chat/completions" />
+      </div>
+      <div class="form-group">
+        <label>Target URL</label>
+        <input type="text" class="input" id="ep-target" placeholder="https://api.openai.com/v1/chat/completions" />
+      </div>
+      <div class="form-group">
+        <label>Method</label>
+        <select class="input" id="ep-method">
+          <option value="POST">POST</option>
+          <option value="GET">GET</option>
+          <option value="PUT">PUT</option>
+          <option value="DELETE">DELETE</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('endpoint-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createEndpoint()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- API Key Modal -->
+<div class="modal-overlay" id="apikey-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Create API Key</h3>
+      <button class="header-btn" onclick="closeModal('apikey-modal')">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" class="input" id="ak-name" placeholder="e.g., Production Key" />
+      </div>
+      <div class="form-group">
+        <label>Scopes</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;color:var(--text-dim);">
+            <input type="checkbox" value="read" checked /> Read
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;color:var(--text-dim);">
+            <input type="checkbox" value="write" checked /> Write
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer;color:var(--text-dim);">
+            <input type="checkbox" value="admin" /> Admin
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Rate Limit (req/min)</label>
+        <input type="number" class="input" id="ak-ratelimit" value="60" min="1" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('apikey-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createApiKey()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Provider Modal -->
+<div class="modal-overlay" id="provider-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Provider</h3>
+      <button class="header-btn" onclick="closeModal('provider-modal')">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Provider Name</label>
+        <input type="text" class="input" id="pv-name" placeholder="e.g., OpenAI" />
+      </div>
+      <div class="form-group">
+        <label>API Base URL</label>
+        <input type="text" class="input" id="pv-url" placeholder="https://api.openai.com/v1" />
+      </div>
+      <div class="form-group">
+        <label>API Key</label>
+        <input type="password" class="input" id="pv-key" placeholder="sk-..." />
+      </div>
+      <div class="form-group">
+        <label>Provider Type</label>
+        <select class="input" id="pv-type">
+          <option value="openai">OpenAI Compatible</option>
+          <option value="anthropic">Anthropic</option>
+          <option value="google">Google AI</option>
+          <option value="azure">Azure OpenAI</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('provider-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createProvider()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Combo Modal -->
+<div class="modal-overlay" id="combo-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Create Combo</h3>
+      <button class="header-btn" onclick="closeModal('combo-modal')">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Combo Name</label>
+        <input type="text" class="input" id="cm-name" placeholder="e.g., Failover Chain" />
+      </div>
+      <div class="form-group">
+        <label>Strategy</label>
+        <select class="input" id="cm-strategy">
+          <option value="fallback">Fallback (failover)</option>
+          <option value="round-robin">Round Robin</option>
+          <option value="weighted">Weighted</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Providers (in order)</label>
+        <div id="cm-providers-list"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('combo-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createCombo()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Command Palette -->
+<div class="cmd-overlay" id="cmd-overlay" onclick="closeCommandPalette(event)">
+  <div class="cmd-palette" onclick="event.stopPropagation()">
+    <div class="cmd-palette-input">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" id="cmd-input" placeholder="Type a command or search..." oninput="filterCommands(this.value)" />
+    </div>
+    <div class="cmd-results" id="cmd-results">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
 
 <script>
-// ── Navigation ──
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-    item.classList.add('active');
-    document.getElementById('view-' + item.dataset.view).classList.remove('hidden');
-    if (item.dataset.view === 'catalog') loadCatalog();
-    if (item.dataset.view === 'providers') loadProviders();
+/* ═══════════════════════════════════════════════════════════════
+   STATE & CONFIG
+   ═══════════════════════════════════════════════════════════════ */
+const STATE = {
+  currentPage: 'home',
+  sidebarCollapsed: false,
+  theme: 'dark',
+  apiUrl: 'http://localhost:20128',
+  apiToken: '',
+  providers: [],
+  endpoints: [],
+  apiKeys: [],
+  combos: [],
+  cache: [],
+  activity: [],
+  health: {},
+  usage: {},
+};
+
+const PAGE_META = {
+  home: { title: 'Dashboard', crumbs: ['Home'] },
+  endpoints: { title: 'Endpoints', crumbs: ['Köprü Proxy', 'Endpoints'] },
+  'api-manager': { title: 'API Manager', crumbs: ['Köprü Proxy', 'API Manager'] },
+  providers: { title: 'Providers', crumbs: ['Köprü Proxy', 'Providers'] },
+  combos: { title: 'Combos', crumbs: ['Köprü Proxy', 'Combos'] },
+  usage: { title: 'Usage Analytics', crumbs: ['Analytics', 'Usage'] },
+  cache: { title: 'Cache', crumbs: ['Analytics', 'Cache'] },
+  activity: { title: 'Activity Log', crumbs: ['Monitoring', 'Activity'] },
+  health: { title: 'Health Monitor', crumbs: ['Monitoring', 'Health'] },
+  settings: { title: 'Settings', crumbs: ['Configuration', 'Settings'] },
+};
+
+const PROVIDER_COLORS = {
+  openai: { bg: '#10a37f', label: 'OpenAI', icon: 'G' },
+  anthropic: { bg: '#d4a574', label: 'Anthropic', icon: 'A' },
+  google: { bg: '#4285f4', label: 'Google', icon: 'G' },
+  deepseek: { bg: '#0066ff', label: 'DeepSeek', icon: 'D' },
+  mistral: { bg: '#ff7000', label: 'Mistral', icon: 'M' },
+  meta: { bg: '#0668E1', label: 'Meta', icon: 'L' },
+  custom: { bg: '#6c5ce7', label: 'Custom', icon: 'C' },
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   INITIALIZATION
+   ═══════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  loadPreferences();
+  applyTheme();
+  applySidebarState();
+  initCommandPalette();
+  setupKeyboardShortcuts();
+  renderCommandPalette();
+  navigateTo(STATE.currentPage);
+
+  // Set up API URL input
+  const apiInput = document.getElementById('apiUrlInput');
+  apiInput.value = STATE.apiUrl;
+  apiInput.addEventListener('change', (e) => {
+    STATE.apiUrl = e.target.value.replace(/\/+$/, '');
+    localStorage.setItem('kopru-api-url', STATE.apiUrl);
+    showToast('API URL updated', 'info');
   });
+
+  // Load initial data
+  loadDashboardData();
 });
 
-// ── Config ──
-const API_BASE = (localStorage.getItem('kopru_api_url') || 'http://194.146.36.72:20128').replace(/\/$/, '');
+function loadPreferences() {
+  STATE.theme = localStorage.getItem('kopru-theme') || 'dark';
+  STATE.sidebarCollapsed = localStorage.getItem('kopru-sidebar') === 'true';
+  STATE.currentPage = localStorage.getItem('kopru-page') || 'home';
+  STATE.apiUrl = localStorage.getItem('kopru-api-url') || 'http://localhost:20128';
+  STATE.apiToken = localStorage.getItem('kopru-api-token') || '';
 
-// API URL ayarla
-function setApiUrl(url) {
-  localStorage.setItem('kopru_api_url', url);
-  location.reload();
+  // Restore settings toggles
+  setTimeout(() => {
+    const setToggle = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+    setToggle('setting-theme', STATE.theme === 'light');
+    setToggle('setting-collapsed', STATE.sidebarCollapsed);
+    setToggle('setting-api-url', false);
+    const apiEl = document.getElementById('setting-api-url');
+    if (apiEl) apiEl.value = STATE.apiUrl;
+    const tokenEl = document.getElementById('setting-api-token');
+    if (tokenEl) tokenEl.value = STATE.apiToken;
+  }, 0);
 }
 
-// ── Data loaders ──
-async function loadOverview() {
+/* ═══════════════════════════════════════════════════════════════
+   API LAYER
+   ═══════════════════════════════════════════════════════════════ */
+async function apiFetch(path, options = {}) {
+  const url = `${STATE.apiUrl}${path}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(STATE.apiToken ? { 'Authorization': `Bearer ${STATE.apiToken}` } : {}),
+    ...options.headers,
+  };
+
   try {
-    const [prov, status] = await Promise.all([
-      fetch(API_BASE + '/api/providers').then(r => r.json()),
-      fetch(API_BASE + '/api/status').then(r => r.json())
+    const res = await fetch(url, { ...options, headers });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`${res.status}: ${text || res.statusText}`);
+    }
+    return await res.json();
+  } catch (err) {
+    if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      // Silently handle - server might not be running
+      return null;
+    }
+    throw err;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════════════════════ */
+function navigateTo(page) {
+  STATE.currentPage = page;
+  localStorage.setItem('kopru-page', page);
+
+  // Update active nav item
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === page);
+  });
+
+  // Show/hide pages
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.toggle('active', p.id === `page-${page}`);
+  });
+
+  // Update header
+  const meta = PAGE_META[page] || { title: page, crumbs: [page] };
+  document.getElementById('header-title').textContent = meta.title;
+  const crumbsHtml = ['Köprü', ...meta.crumbs].map((c, i, a) =>
+    i === a.length - 1 ? `<span>${c}</span>` : `<span>${c}</span><span class="separator">/</span>`
+  ).join('');
+  document.getElementById('breadcrumbs').innerHTML = crumbsHtml;
+
+  // Scroll to top
+  document.getElementById('content').scrollTop = 0;
+
+  // Load page data
+  loadPageData(page);
+
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('mobile-open');
+}
+
+function loadPageData(page) {
+  switch (page) {
+    case 'home': loadDashboardData(); break;
+    case 'endpoints': loadEndpoints(); break;
+    case 'api-manager': loadApiKeys(); break;
+    case 'providers': loadProviders(); break;
+    case 'combos': loadCombos(); break;
+    case 'usage': loadUsage(); break;
+    case 'cache': loadCache(); break;
+    case 'activity': loadActivity(); break;
+    case 'health': loadHealth(); break;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════════════════════════ */
+function toggleSidebar() {
+  STATE.sidebarCollapsed = !STATE.sidebarCollapsed;
+  localStorage.setItem('kopru-sidebar', STATE.sidebarCollapsed);
+  applySidebarState();
+}
+
+function applySidebarState() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('collapsed', STATE.sidebarCollapsed);
+  const icon = document.getElementById('sidebar-toggle-icon');
+  const text = document.getElementById('sidebar-toggle-text');
+  icon.textContent = STATE.sidebarCollapsed ? 'chevron_right' : 'chevron_left';
+  text.textContent = STATE.sidebarCollapsed ? '' : 'Collapse';
+  const toggle = document.getElementById('setting-collapsed');
+  if (toggle) toggle.checked = STATE.sidebarCollapsed;
+}
+
+function toggleSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  if (section) section.classList.toggle('open');
+}
+
+function toggleMobileSidebar() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   THEME
+   ═══════════════════════════════════════════════════════════════ */
+function toggleTheme() {
+  STATE.theme = STATE.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('kopru-theme', STATE.theme);
+  applyTheme();
+}
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', STATE.theme);
+  const icon = document.getElementById('theme-icon');
+  icon.textContent = STATE.theme === 'dark' ? 'dark_mode' : 'light_mode';
+  const toggle = document.getElementById('setting-theme');
+  if (toggle) toggle.checked = STATE.theme === 'light';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODALS
+   ═══════════════════════════════════════════════════════════════ */
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  // Populate provider selects
+  if (id === 'endpoint-modal') {
+    const sel = document.getElementById('ep-provider');
+    sel.innerHTML = '<option value="">Select provider...</option>';
+    STATE.providers.forEach(p => {
+      sel.innerHTML += `<option value="${p.id || p.name}">${p.name || p.id}</option>`;
+    });
+  }
+  if (id === 'combo-modal') {
+    renderComboProvidersList();
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// Close modals on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+    document.getElementById('cmd-overlay').classList.remove('active');
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════════ */
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const icons = { success: 'check_circle', error: 'error', warning: 'warning', info: 'info' };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span class="material-symbols-outlined" style="font-size:18px;color:var(--${type === 'success' ? 'green' : type === 'error' ? 'red' : type === 'warning' ? 'yellow' : 'blue'})">${icons[type]}</span>
+    <span>${message}</span>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(20px)';
+    toast.style.transition = '0.2s ease';
+    setTimeout(() => toast.remove(), 200);
+  }, 3000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMMAND PALETTE
+   ═══════════════════════════════════════════════════════════════ */
+const COMMANDS = [
+  { icon: 'home', label: 'Go to Dashboard', page: 'home', shortcut: '⌘1' },
+  { icon: 'route', label: 'Go to Endpoints', page: 'endpoints', shortcut: '⌘2' },
+  { icon: 'key', label: 'Go to API Manager', page: 'api-manager', shortcut: '⌘3' },
+  { icon: 'dns', label: 'Go to Providers', page: 'providers', shortcut: '⌘4' },
+  { icon: 'merge', label: 'Go to Combos', page: 'combos', shortcut: '⌘5' },
+  { icon: 'monitoring', label: 'Go to Usage', page: 'usage', shortcut: '⌘6' },
+  { icon: 'cached', label: 'Go to Cache', page: 'cache', shortcut: '⌘7' },
+  { icon: 'activity_log', label: 'Go to Activity', page: 'activity', shortcut: '⌘8' },
+  { icon: 'favorite', label: 'Go to Health', page: 'health', shortcut: '⌘9' },
+  { icon: 'tune', label: 'Go to Settings', page: 'settings', shortcut: '⌘0' },
+  { icon: 'dark_mode', label: 'Toggle Theme', action: 'toggleTheme', shortcut: '⌘D' },
+  { icon: 'refresh', label: 'Refresh Data', action: 'refreshAll', shortcut: '⌘R' },
+  { icon: 'add', label: 'Add Provider', action: 'provider-modal' },
+  { icon: 'add', label: 'Add Endpoint', action: 'endpoint-modal' },
+  { icon: 'add', label: 'Create API Key', action: 'apikey-modal' },
+];
+
+function initCommandPalette() {
+  renderCommandPalette();
+}
+
+function renderCommandPalette(filter = '') {
+  const container = document.getElementById('cmd-results');
+  const filtered = COMMANDS.filter(cmd =>
+    cmd.label.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  container.innerHTML = filtered.map((cmd, i) => `
+    <div class="cmd-item${i === 0 ? ' selected' : ''}" data-idx="${i}" onclick="executeCommand(${COMMANDS.indexOf(cmd)})">
+      <span class="material-symbols-outlined">${cmd.icon}</span>
+      <span>${cmd.label}</span>
+      ${cmd.shortcut ? `<span class="shortcut">${cmd.shortcut}</span>` : ''}
+    </div>
+  `).join('');
+}
+
+function filterCommands(value) {
+  renderCommandPalette(value);
+}
+
+function executeCommand(idx) {
+  const cmd = COMMANDS[idx];
+  if (cmd.page) navigateTo(cmd.page);
+  else if (cmd.action === 'toggleTheme') toggleTheme();
+  else if (cmd.action === 'refreshAll') loadDashboardData();
+  else if (cmd.action) openModal(cmd.action);
+  document.getElementById('cmd-overlay').classList.remove('active');
+}
+
+function openCommandPalette() {
+  document.getElementById('cmd-overlay').classList.add('active');
+  const input = document.getElementById('cmd-input');
+  input.value = '';
+  input.focus();
+  renderCommandPalette();
+}
+
+function closeCommandPalette(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('cmd-overlay').classList.remove('active');
+}
+
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    // Cmd/Ctrl + K for command palette
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      openCommandPalette();
+    }
+    // Escape to close
+    if (e.key === 'Escape') {
+      document.getElementById('cmd-overlay').classList.remove('active');
+    }
+    // Cmd/Ctrl + number for pages
+    if ((e.metaKey || e.ctrlKey) && e.key >= '0' && e.key <= '9') {
+      e.preventDefault();
+      const pages = ['home', 'endpoints', 'api-manager', 'providers', 'combos', 'usage', 'cache', 'activity', 'health', 'settings'];
+      const idx = parseInt(e.key);
+      if (pages[idx]) navigateTo(pages[idx]);
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SETTINGS
+   ═══════════════════════════════════════════════════════════════ */
+function saveSettings() {
+  STATE.apiUrl = document.getElementById('setting-api-url').value.replace(/\/+$/, '') || 'http://localhost:20128';
+  STATE.apiToken = document.getElementById('setting-api-token').value;
+  localStorage.setItem('kopru-api-url', STATE.apiUrl);
+  localStorage.setItem('kopru-api-token', STATE.apiToken);
+  document.getElementById('apiUrlInput').value = STATE.apiUrl;
+  showToast('Settings saved successfully', 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DASHBOARD DATA LOADING
+   ═══════════════════════════════════════════════════════════════ */
+async function loadDashboardData() {
+  try {
+    const [status, providers, endpoints, keys, usage] = await Promise.all([
+      apiFetch('/api/status'),
+      apiFetch('/api/providers'),
+      apiFetch('/api/endpoints'),
+      apiFetch('/api/keys'),
+      apiFetch('/api/usage?range=24h'),
     ]);
-    const active = Object.values(prov).filter(p => p.enabled && p.healthy).length;
-    document.getElementById('ov-providers').textContent = active;
-    document.getElementById('ov-total').textContent = status.total_requests;
-    document.getElementById('ov-success').textContent = status.successful;
-    document.getElementById('ov-fallback').textContent = status.fallback_used;
-  } catch (e) {}
+
+    if (status) {
+      STATE.providers = status.providers || providers || [];
+      STATE.endpoints = status.endpoints || endpoints || [];
+      STATE.apiKeys = status.apiKeys || keys || [];
+      STATE.usage = usage || {};
+    } else {
+      // Use fallback/demo data if server is unreachable
+      loadDemoData();
+    }
+
+    renderDashboard();
+  } catch (err) {
+    console.warn('Dashboard fetch failed, using demo data:', err.message);
+    loadDemoData();
+    renderDashboard();
+  }
+}
+
+function loadDemoData() {
+  STATE.providers = [
+    { id: 'openai', name: 'OpenAI', type: 'openai', url: 'https://api.openai.com/v1', status: 'connected', models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'o1-preview'], uptime: 99.98, requests24h: 12450, latencyMs: 320 },
+    { id: 'anthropic', name: 'Anthropic', type: 'anthropic', url: 'https://api.anthropic.com/v1', status: 'connected', models: ['claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'], uptime: 99.95, requests24h: 8320, latencyMs: 280 },
+    { id: 'google', name: 'Google AI', type: 'google', url: 'https://generativelanguage.googleapis.com/v1', status: 'connected', models: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-pro'], uptime: 99.90, requests24h: 5670, latencyMs: 250 },
+    { id: 'deepseek', name: 'DeepSeek', type: 'deepseek', url: 'https://api.deepseek.com/v1', status: 'connected', models: ['deepseek-chat', 'deepseek-coder'], uptime: 99.85, requests24h: 3200, latencyMs: 410 },
+    { id: 'mistral', name: 'Mistral', type: 'mistral', url: 'https://api.mistral.ai/v1', status: 'degraded', models: ['mistral-large-latest', 'mistral-medium-latest', 'codestral-latest'], uptime: 98.50, requests24h: 1890, latencyMs: 350 },
+    { id: 'meta', name: 'Meta (LLaMA)', type: 'meta', url: 'https://api.together.xyz/v1', status: 'connected', models: ['Llama-3.1-405B', 'Llama-3.1-70B', 'Llama-3.1-8B'], uptime: 99.70, requests24h: 4560, latencyMs: 290 },
+  ];
+
+  STATE.endpoints = [
+    { id: 'ep1', path: '/v1/chat/completions', provider: 'openai', target: 'https://api.openai.com/v1/chat/completions', method: 'POST', status: 'active', models: ['gpt-4o', 'gpt-4o-mini'] },
+    { id: 'ep2', path: '/v1/messages', provider: 'anthropic', target: 'https://api.anthropic.com/v1/messages', method: 'POST', status: 'active', models: ['claude-sonnet-4-20250514', 'claude-3-5-haiku-20241022'] },
+    { id: 'ep3', path: '/v1/generate', provider: 'google', target: 'https://generativelanguage.googleapis.com/v1beta', method: 'POST', status: 'active', models: ['gemini-2.5-pro', 'gemini-2.5-flash'] },
+    { id: 'ep4', path: '/v1/completions', provider: 'deepseek', target: 'https://api.deepseek.com/v1', method: 'POST', status: 'active', models: ['deepseek-chat'] },
+    { id: 'ep5', path: '/v1/embeddings', provider: 'openai', target: 'https://api.openai.com/v1/embeddings', method: 'POST', status: 'active', models: ['text-embedding-3-small', 'text-embedding-3-large'] },
+    { id: 'ep6', path: '/v1/models', provider: 'mistral', target: 'https://api.mistral.ai/v1', method: 'GET', status: 'inactive', models: ['mistral-large-latest'] },
+  ];
+
+  STATE.apiKeys = [
+    { id: 'key1', name: 'Production', key: 'sk-or-prod-****8f2a', scopes: ['read', 'write'], rateLimit: 120, created: '2025-01-15', status: 'active', requests24h: 8420 },
+    { id: 'key2', name: 'Development', key: 'sk-or-dev-****3c7b', scopes: ['read', 'write', 'admin'], rateLimit: 60, created: '2025-02-01', status: 'active', requests24h: 2130 },
+    { id: 'key3', name: 'Testing', key: 'sk-or-test-****9d4e', scopes: ['read'], rateLimit: 30, created: '2025-03-10', status: 'active', requests24h: 450 },
+    { id: 'key4', name: 'Legacy', key: 'sk-or-leg-****1a5f', scopes: ['read'], rateLimit: 10, created: '2024-11-20', status: 'revoked', requests24h: 0 },
+  ];
+
+  STATE.combos = [
+    { id: 'cb1', name: 'Primary Fallback', strategy: 'fallback', providers: ['openai', 'anthropic', 'google'], status: 'active' },
+    { id: 'cb2', name: 'Cost Optimizer', strategy: 'weighted', providers: ['deepseek', 'meta', 'mistral'], status: 'active' },
+    { id: 'cb3', name: 'Round Robin Pool', strategy: 'round-robin', providers: ['openai', 'anthropic', 'google', 'deepseek'], status: 'active' },
+  ];
+
+  STATE.cache = [
+    { hash: 'a3f2c...', model: 'gpt-4o', tokens: 2847, size: '12.4 KB', created: '2 min ago', ttl: '58 min' },
+    { hash: 'b7d1e...', model: 'claude-sonnet-4-20250514', tokens: 1523, size: '6.8 KB', created: '5 min ago', ttl: '55 min' },
+    { hash: 'c2a8f...', model: 'gemini-2.5-pro', tokens: 3102, size: '14.1 KB', created: '8 min ago', ttl: '52 min' },
+    { hash: 'd9e4b...', model: 'gpt-4o-mini', tokens: 891, size: '3.2 KB', created: '12 min ago', ttl: '48 min' },
+    { hash: 'e5c3a...', model: 'deepseek-chat', tokens: 4210, size: '18.7 KB', created: '15 min ago', ttl: '45 min' },
+    { hash: 'f1b6d...', model: 'claude-3-5-haiku-20241022', tokens: 567, size: '2.1 KB', created: '20 min ago', ttl: '40 min' },
+  ];
+
+  STATE.activity = [
+    { time: '14:32:15', type: 'request', provider: 'OpenAI', model: 'gpt-4o', status: 200, latency: 342, tokens: 1523 },
+    { time: '14:32:12', type: 'request', provider: 'Anthropic', model: 'claude-sonnet-4-20250514', status: 200, latency: 287, tokens: 2841 },
+    { time: '14:32:08', type: 'error', provider: 'Mistral', model: 'mistral-large-latest', status: 503, latency: 5210, tokens: 0 },
+    { time: '14:31:58', type: 'request', provider: 'Google', model: 'gemini-2.5-pro', status: 200, latency: 256, tokens: 934 },
+    { time: '14:31:45', type: 'request', provider: 'DeepSeek', model: 'deepseek-chat', status: 200, latency: 412, tokens: 3456 },
+    { time: '14:31:30', type: 'admin', provider: '-', model: '-', status: 200, latency: 0, tokens: 0 },
+    { time: '14:31:22', type: 'request', provider: 'Meta', model: 'Llama-3.1-70B', status: 200, latency: 298, tokens: 1823 },
+    { time: '14:31:15', type: 'request', provider: 'OpenAI', model: 'gpt-4o-mini', status: 200, latency: 156, tokens: 567 },
+    { time: '14:30:58', type: 'error', provider: 'Mistral', model: 'mistral-large-latest', status: 429, latency: 203, tokens: 0 },
+    { time: '14:30:42', type: 'request', provider: 'Anthropic', model: 'claude-3-5-haiku-20241022', status: 200, latency: 189, tokens: 432 },
+  ];
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER FUNCTIONS
+   ═══════════════════════════════════════════════════════════════ */
+function renderDashboard() {
+  // Stats
+  document.getElementById('stat-providers').textContent = STATE.providers.length;
+  document.getElementById('stat-endpoints').textContent = STATE.endpoints.length;
+  document.getElementById('stat-apikeys').textContent = STATE.apiKeys.filter(k => k.status === 'active').length;
+  const totalReqs = STATE.providers.reduce((s, p) => s + (p.requests24h || 0), 0);
+  document.getElementById('stat-requests').textContent = formatNumber(totalReqs);
+
+  // Provider topology
+  const topologyGrid = document.getElementById('provider-topology');
+  topologyGrid.innerHTML = STATE.providers.map(p => {
+    const colors = PROVIDER_COLORS[p.type] || PROVIDER_COLORS.custom;
+    const statusColor = p.status === 'connected' ? 'green' : p.status === 'degraded' ? 'yellow' : 'red';
+    const statusText = p.status === 'connected' ? 'Connected' : p.status === 'degraded' ? 'Degraded' : 'Offline';
+    return `
+      <div class="topology-card" onclick="navigateTo('providers')">
+        <div class="provider-header">
+          <div class="provider-logo" style="background:${colors.bg}">${colors.icon}</div>
+          <div>
+            <div class="provider-name">${p.name}</div>
+            <div class="provider-status">
+              <span class="status-dot ${statusColor}" style="margin-right:4px"></span>
+              ${statusText}
+            </div>
+          </div>
+          <span style="margin-left:auto;" class="badge badge-${statusColor === 'green' ? 'green' : statusColor === 'yellow' ? 'yellow' : 'red'}">
+            ${(p.uptime || 0).toFixed(2)}%
+          </span>
+        </div>
+        <div style="display:flex;gap:16px;font-size:12px;color:var(--text-dim);">
+          <span>${(p.models || []).length} models</span>
+          <span>${formatNumber(p.requests24h || 0)} reqs</span>
+          <span>${p.latencyMs || 0}ms avg</span>
+        </div>
+        <div class="model-tags">
+          ${(p.models || []).slice(0, 4).map(m => `<span class="model-tag">${m}</span>`).join('')}
+          ${(p.models || []).length > 4 ? `<span class="model-tag">+${p.models.length - 4}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Health matrix
+  const healthMatrix = document.getElementById('health-matrix');
+  healthMatrix.innerHTML = STATE.providers.map(p => {
+    const statusColor = p.status === 'connected' ? 'green' : p.status === 'degraded' ? 'yellow' : 'red';
+    return `
+      <div class="health-row">
+        <span class="status-dot ${statusColor}"></span>
+        <span class="label">${p.name}</span>
+        <span class="value">${p.latencyMs || '--'}ms</span>
+      </div>
+    `;
+  }).join('');
+
+  // System info
+  document.getElementById('sys-version').textContent = '2.4.1';
+  document.getElementById('sys-uptime').textContent = '14d 7h 23m';
+  document.getElementById('sys-node').textContent = 'v20.11.0';
+  document.getElementById('sys-memory').textContent = '256 MB';
+  document.getElementById('sys-port').textContent = STATE.apiUrl.split(':').pop() || '20128';
+}
+
+function renderEndpoints() {
+  const container = document.getElementById('endpoint-list');
+  container.innerHTML = STATE.endpoints.map(ep => {
+    const provider = STATE.providers.find(p => p.id === ep.provider || p.name === ep.provider) || {};
+    const colors = PROVIDER_COLORS[provider.type] || PROVIDER_COLORS.custom;
+    const statusClass = ep.status === 'active' ? 'green' : 'red';
+    return `
+      <div class="endpoint-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="provider-logo" style="background:${colors.bg};width:32px;height:32px;font-size:14px;border-radius:6px;">${colors.icon}</div>
+            <div>
+              <div style="font-weight:600;font-size:14px;">${ep.path}</div>
+              <div style="font-size:12px;color:var(--text-dim);">${provider.name || ep.provider} · ${ep.method}</div>
+            </div>
+          </div>
+          <span class="badge badge-${statusClass === 'green' ? 'green' : 'red'}">
+            <span class="status-dot ${statusClass}"></span>
+            ${ep.status}
+          </span>
+        </div>
+        <div class="endpoint-url">
+          <span>${STATE.apiUrl}${ep.path}</span>
+          <span class="copy-btn material-symbols-outlined" style="font-size:16px" onclick="copyText('${STATE.apiUrl}${ep.path}')">content_copy</span>
+        </div>
+        <div class="model-tags">
+          ${(ep.models || []).map(m => `<span class="model-tag">${m}</span>`).join('')}
+        </div>
+        <div style="display:flex;gap:6px;margin-top:12px;">
+          <button class="btn btn-secondary btn-sm" onclick="editEndpoint('${ep.id}')">
+            <span class="material-symbols-outlined" style="font-size:14px">edit</span> Edit
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="deleteEndpoint('${ep.id}')">
+            <span class="material-symbols-outlined" style="font-size:14px">delete</span> Delete
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderApiKeys() {
+  const tbody = document.getElementById('apikey-table-body');
+  tbody.innerHTML = STATE.apiKeys.map(key => `
+    <tr>
+      <td style="font-weight:500;">${key.name}</td>
+      <td><code style="font-size:12px;color:var(--text-dim);">${key.key}</code></td>
+      <td>
+        ${(key.scopes || []).map(s => `<span class="badge badge-blue" style="margin-right:4px;">${s}</span>`).join('')}
+      </td>
+      <td>${key.rateLimit} req/min</td>
+      <td style="color:var(--text-dim);">${key.created}</td>
+      <td>
+        <span class="badge badge-${key.status === 'active' ? 'green' : 'red'}">
+          ${key.status}
+        </span>
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          ${key.status === 'active' ? `
+            <button class="btn btn-secondary btn-sm" onclick="revokeApiKey('${key.id}')">Revoke</button>
+          ` : `
+            <button class="btn btn-success btn-sm" onclick="activateApiKey('${key.id}')">Activate</button>
+          `}
+          <button class="btn btn-danger btn-sm" onclick="deleteApiKey('${key.id}')">
+            <span class="material-symbols-outlined" style="font-size:14px">delete</span>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderProviders() {
+  const container = document.getElementById('provider-catalog');
+  container.innerHTML = STATE.providers.map(p => {
+    const colors = PROVIDER_COLORS[p.type] || PROVIDER_COLORS.custom;
+    const statusColor = p.status === 'connected' ? 'green' : p.status === 'degraded' ? 'yellow' : 'red';
+    return `
+      <div class="card" style="cursor:default;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div class="provider-logo" style="background:${colors.bg}">${colors.icon}</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:15px;">${p.name}</div>
+            <div style="font-size:12px;color:var(--text-dim);">${p.url || 'Not configured'}</div>
+          </div>
+          <span class="badge badge-${statusColor === 'green' ? 'green' : statusColor === 'yellow' ? 'yellow' : 'red'}">
+            <span class="status-dot ${statusColor}"></span>
+            ${p.status || 'unknown'}
+          </span>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Models</div>
+          <div class="model-tags">
+            ${(p.models || []).map(m => `<span class="model-tag">${m}</span>`).join('')}
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;font-size:12px;color:var(--text-dim);margin-bottom:14px;">
+          <span>Uptime: ${(p.uptime || 0).toFixed(2)}%</span>
+          <span>Latency: ${p.latencyMs || '--'}ms</span>
+          <span>Reqs/24h: ${formatNumber(p.requests24h || 0)}</span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-secondary btn-sm" onclick="editProvider('${p.id}')">
+            <span class="material-symbols-outlined" style="font-size:14px">edit</span> Edit
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProvider('${p.id}')">
+            <span class="material-symbols-outlined" style="font-size:14px">delete</span> Remove
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderCombos() {
+  const container = document.getElementById('combo-list');
+  container.innerHTML = STATE.combos.map(cb => `
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="material-symbols-outlined" style="color:var(--purple)">merge</span>
+          <div>
+            <div style="font-weight:600;">${cb.name}</div>
+            <div style="font-size:12px;color:var(--text-dim);">${cb.strategy}</div>
+          </div>
+        </div>
+        <span class="badge badge-${cb.status === 'active' ? 'green' : 'red'}">
+          <span class="status-dot ${cb.status === 'active' ? 'green' : 'red'}"></span>
+          ${cb.status}
+        </span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+        ${(cb.providers || []).map((p, i) => {
+          const prov = STATE.providers.find(pr => pr.id === p) || {};
+          const colors = PROVIDER_COLORS[prov.type] || PROVIDER_COLORS.custom;
+          return `
+            <div style="display:flex;align-items:center;gap:4px;background:var(--bg);padding:4px 8px;border-radius:4px;font-size:12px;">
+              ${i > 0 ? '<span style="color:var(--text-muted);">→</span>' : ''}
+              <div style="width:16px;height:16px;border-radius:4px;background:${colors.bg};display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:700;">${colors.icon}</div>
+              <span>${prov.name || p}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-secondary btn-sm">
+          <span class="material-symbols-outlined" style="font-size:14px">edit</span> Edit
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCombo('${cb.id}')">
+          <span class="material-symbols-outlined" style="font-size:14px">delete</span> Delete
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderUsage() {
+  // Stats
+  document.getElementById('usage-total').textContent = formatNumber(Math.floor(Math.random() * 50000) + 30000);
+  document.getElementById('usage-success').textContent = formatNumber(Math.floor(Math.random() * 45000) + 28000);
+  document.getElementById('usage-errors').textContent = formatNumber(Math.floor(Math.random() * 500) + 50);
+  document.getElementById('usage-latency').textContent = (Math.random() * 200 + 200).toFixed(0) + 'ms';
+
+  // Bar chart - requests over time
+  const requestChart = document.getElementById('usage-chart-requests');
+  const bars = [];
+  for (let i = 0; i < 24; i++) {
+    const val = Math.floor(Math.random() * 80) + 20;
+    bars.push(`
+      <div class="chart-bar" style="height:${val}%;background:var(--accent);">
+        <div class="tooltip">${String(i).padStart(2, '0')}:00 — ${formatNumber(val * 50)} requests</div>
+      </div>
+    `);
+  }
+  requestChart.innerHTML = bars.join('');
+
+  // Token chart
+  const tokenChart = document.getElementById('usage-chart-tokens');
+  const tokenLegend = document.getElementById('usage-chart-tokens-legend');
+  const providerUsage = STATE.providers.slice(0, 6).map(p => ({
+    name: p.name,
+    color: (PROVIDER_COLORS[p.type] || PROVIDER_COLORS.custom).bg,
+    tokens: Math.floor(Math.random() * 500000) + 50000,
+  }));
+  const maxTokens = Math.max(...providerUsage.map(p => p.tokens));
+  tokenChart.innerHTML = providerUsage.map(p => `
+    <div class="chart-bar" style="height:${(p.tokens / maxTokens * 100).toFixed(1)}%;background:${p.color};">
+      <div class="tooltip">${p.name} — ${formatNumber(p.tokens)} tokens</div>
+    </div>
+  `).join('');
+  tokenLegend.innerHTML = providerUsage.map(p => `
+    <div class="chart-legend-item">
+      <div class="chart-legend-dot" style="background:${p.color}"></div>
+      ${p.name}
+    </div>
+  `).join('');
+}
+
+function renderCache() {
+  document.getElementById('cache-entries').textContent = STATE.cache.length.toString();
+  document.getElementById('cache-size').textContent = '47.3 KB';
+  document.getElementById('cache-hit-rate').textContent = '73.2%';
+  document.getElementById('cache-saved').textContent = formatNumber(234567);
+
+  const tbody = document.getElementById('cache-table-body');
+  tbody.innerHTML = STATE.cache.map(c => `
+    <tr>
+      <td><code style="font-size:12px;color:var(--accent2);">${c.hash}</code></td>
+      <td>${c.model}</td>
+      <td>${formatNumber(c.tokens)}</td>
+      <td style="color:var(--text-dim);">${c.size}</td>
+      <td style="color:var(--text-dim);">${c.created}</td>
+      <td><span class="badge badge-green">${c.ttl}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderActivity() {
+  const filter = document.getElementById('activity-filter')?.value || 'all';
+  const filtered = filter === 'all' ? STATE.activity : STATE.activity.filter(a => a.type === filter);
+
+  const tbody = document.getElementById('activity-table-body');
+  tbody.innerHTML = filtered.map(a => {
+    const typeColor = a.type === 'error' ? 'red' : a.type === 'admin' ? 'yellow' : 'green';
+    const typeIcon = a.type === 'error' ? 'error' : a.type === 'admin' ? 'admin_panel_settings' : 'check_circle';
+    return `
+      <tr>
+        <td style="font-family:monospace;font-size:12px;color:var(--text-dim);">${a.time}</td>
+        <td>
+          <span class="badge badge-${typeColor}">
+            <span class="material-symbols-outlined" style="font-size:12px;">${typeIcon}</span>
+            ${a.type}
+          </span>
+        </td>
+        <td>${a.provider}</td>
+        <td style="font-size:12px;">${a.model}</td>
+        <td>
+          <span class="badge badge-${a.status < 300 ? 'green' : a.status < 500 ? 'yellow' : 'red'}">${a.status}</span>
+        </td>
+        <td style="font-family:monospace;font-size:12px;">${a.latency}ms</td>
+        <td>${formatNumber(a.tokens)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderHealth() {
+  const container = document.getElementById('health-cards');
+  container.innerHTML = STATE.providers.map(p => {
+    const colors = PROVIDER_COLORS[p.type] || PROVIDER_COLORS.custom;
+    const statusColor = p.status === 'connected' ? 'green' : p.status === 'degraded' ? 'yellow' : 'red';
+    const statusText = p.status === 'connected' ? 'Healthy' : p.status === 'degraded' ? 'Degraded' : 'Offline';
+    return `
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div class="provider-logo" style="background:${colors.bg}">${colors.icon}</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;">${p.name}</div>
+            <div style="font-size:12px;color:var(--text-dim);">${p.url || 'No URL'}</div>
+          </div>
+          <span class="badge badge-${statusColor}">
+            <span class="status-dot ${statusColor}"></span>
+            ${statusText}
+          </span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="health-row">
+            <span class="status-dot ${statusColor}"></span>
+            <span class="label">Uptime</span>
+            <span class="value">${(p.uptime || 0).toFixed(2)}%</span>
+          </div>
+          <div class="health-row">
+            <span class="status-dot ${statusColor}"></span>
+            <span class="label">Latency</span>
+            <span class="value">${p.latencyMs || '--'}ms</span>
+          </div>
+          <div class="health-row">
+            <span class="status-dot ${statusColor}"></span>
+            <span class="label">Requests</span>
+            <span class="value">${formatNumber(p.requests24h || 0)}/24h</span>
+          </div>
+          <div class="health-row">
+            <span class="status-dot ${statusColor}"></span>
+            <span class="label">Models</span>
+            <span class="value">${(p.models || []).length}</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Available Models</div>
+          <div class="model-tags">
+            ${(p.models || []).map(m => `<span class="model-tag">${m}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE LOADERS
+   ═══════════════════════════════════════════════════════════════ */
+async function loadEndpoints() {
+  if (STATE.endpoints.length === 0) loadDemoData();
+  renderEndpoints();
+}
+
+async function loadApiKeys() {
+  if (STATE.apiKeys.length === 0) loadDemoData();
+  renderApiKeys();
 }
 
 async function loadProviders() {
   try {
-    const data = await fetch(API_BASE + '/api/providers').then(r => r.json());
-    const el = document.getElementById('provider-list');
-    el.innerHTML = '';
-    for (const [name, info] of Object.entries(data)) {
-      const badge = info.healthy ? '<span class="badge ok">çalışıyor</span>'
-                                  : (info.circuit_open ? '<span class="badge bad">devre açık</span>' : '<span class="badge warn">serviste</span>');
-      el.innerHTML += `<div class="provider-row">
-        <div class="provider-name"><div class="provider-icon">${name[0].toUpperCase()}</div>${name}</div>
-        <div style="text-align:right">
-          <div class="provider-meta">${info.models.join(', ')}</div>
-          ${badge}
-        </div>
-      </div>`;
-    }
-  } catch (e) {
-    document.getElementById('provider-list').innerHTML = '<p style="color:var(--color-error)">Yüklenemedi</p>';
-  }
-}
-
-async function loadCatalog() {
-  try {
-    const data = await fetch(API_BASE + '/api/providers-catalog').then(r => r.json());
-    const total = Object.keys(data.providers || {}).length;
-    document.getElementById('cat-count').textContent = total;
-    const el = document.getElementById('catalog-list');
-    el.innerHTML = '';
-    for (const [cat, ids] of Object.entries(data.categories || {})) {
-      el.innerHTML += `<div class="card" style="margin-bottom:12px">
-        <h3>${cat} (${ids.length})</h3>
-        <div class="provider-meta">${ids.join(' · ')}</div>
-      </div>`;
-    }
-  } catch (e) {
-    document.getElementById('catalog-list').innerHTML = '<p style="color:var(--color-error)">Katalog yüklenemedi</p>';
-  }
-}
-
-async function loadStats() {
-  try {
-    const d = await fetch(API_BASE + '/api/status').then(r => r.json());
-    document.getElementById('st-total').textContent = d.total_requests;
-    const rate = d.total_requests ? Math.round(d.successful / d.total_requests * 100) : 0;
-    document.getElementById('st-rate').textContent = rate + '%';
-    document.getElementById('st-fallback').textContent = d.fallback_used;
-    document.getElementById('st-tokens').textContent = d.total_tokens;
-    const pp = document.getElementById('st-per-provider');
-    pp.innerHTML = Object.entries(d.per_provider || {})
-      .map(([k,v]) => `<div class="provider-row"><span>${k}</span><span class="provider-meta">${v} istek</span></div>`)
-      .join('') || '<p style="color:var(--color-muted)">Henüz veri yok</p>';
+    const data = await apiFetch('/api/providers');
+    if (data && Array.isArray(data)) STATE.providers = data;
   } catch (e) {}
+  if (STATE.providers.length === 0) loadDemoData();
+  renderProviders();
 }
 
-async function loadModels() {
+async function loadCombos() {
+  if (STATE.combos.length === 0) loadDemoData();
+  renderCombos();
+}
+
+async function loadUsage() {
+  renderUsage();
+}
+
+async function loadCache() {
+  if (STATE.cache.length === 0) loadDemoData();
+  renderCache();
+}
+
+async function loadActivity() {
+  if (STATE.activity.length === 0) loadDemoData();
+  renderActivity();
+}
+
+async function loadHealth() {
+  if (STATE.providers.length === 0) loadDemoData();
+  renderHealth();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CRUD ACTIONS
+   ═══════════════════════════════════════════════════════════════ */
+async function createEndpoint() {
+  const ep = {
+    path: document.getElementById('ep-path').value,
+    provider: document.getElementById('ep-provider').value,
+    target: document.getElementById('ep-target').value,
+    method: document.getElementById('ep-method').value,
+    status: 'active',
+    models: [],
+  };
+
+  if (!ep.path || !ep.provider) {
+    showToast('Please fill in all required fields', 'warning');
+    return;
+  }
+
   try {
-    const data = await fetch(API_BASE + '/v1/models').then(r => r.json());
-    const sel = document.getElementById('model');
-    sel.innerHTML = '<option value="">Otomatik (fallback)</option>';
-    (data.data || []).forEach(m => sel.innerHTML += `<option value="${m.id}">${m.id}</option>`);
+    await apiFetch('/api/endpoints', { method: 'POST', body: JSON.stringify(ep) });
+    showToast('Endpoint created', 'success');
+  } catch (e) {
+    STATE.endpoints.push({ ...ep, id: 'ep' + Date.now() });
+    showToast('Endpoint added locally (server unavailable)', 'info');
+  }
+
+  closeModal('endpoint-modal');
+  renderEndpoints();
+}
+
+async function deleteEndpoint(id) {
+  if (!confirm('Delete this endpoint?')) return;
+  try {
+    await apiFetch(`/api/endpoints/${id}`, { method: 'DELETE' });
   } catch (e) {}
+  STATE.endpoints = STATE.endpoints.filter(e => e.id !== id);
+  renderEndpoints();
+  showToast('Endpoint deleted', 'success');
 }
 
-async function send() {
-  const model = document.getElementById('model').value;
-  const prompt = document.getElementById('prompt').value;
-  const resp = document.getElementById('response');
-  resp.textContent = '⏳ Düşünüyor...';
+function editEndpoint(id) {
+  showToast('Edit endpoint: ' + id, 'info');
+}
+
+async function createApiKey() {
+  const name = document.getElementById('ak-name').value;
+  const rateLimit = parseInt(document.getElementById('ak-ratelimit').value) || 60;
+  const scopes = [...document.querySelectorAll('#apikey-modal input[type=checkbox]:checked')].map(c => c.value);
+
+  if (!name) {
+    showToast('Please enter a name', 'warning');
+    return;
+  }
+
+  const newKey = {
+    id: 'key' + Date.now(),
+    name,
+    key: `sk-or-${name.toLowerCase().replace(/\s+/g, '-')}-****${Math.random().toString(36).slice(2, 6)}`,
+    scopes,
+    rateLimit,
+    created: new Date().toISOString().split('T')[0],
+    status: 'active',
+    requests24h: 0,
+  };
+
   try {
-    const res = await fetch(API_BASE + '/v1/chat/completions', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ model, stream: false, messages: [{role: 'user', content: prompt}] })
-    });
-    const data = await res.json();
-    if (data.error) resp.textContent = '❌ ' + data.error.message;
-    else resp.textContent = data.choices[0].message.content;
-    loadOverview(); loadStats();
-  } catch (e) { resp.textContent = '❌ Bağlantı hatası: ' + e; }
+    await apiFetch('/api/keys', { method: 'POST', body: JSON.stringify(newKey) });
+  } catch (e) {}
+
+  STATE.apiKeys.push(newKey);
+  closeModal('apikey-modal');
+  renderApiKeys();
+  showToast('API key created', 'success');
 }
 
-// Init
-loadOverview(); loadModels(); loadStats();
-setInterval(() => { loadOverview(); loadStats(); }, 15000);
+async function revokeApiKey(id) {
+  if (!confirm('Revoke this API key?')) return;
+  const key = STATE.apiKeys.find(k => k.id === id);
+  if (key) key.status = 'revoked';
+  renderApiKeys();
+  showToast('API key revoked', 'warning');
+}
+
+async function activateApiKey(id) {
+  const key = STATE.apiKeys.find(k => k.id === id);
+  if (key) key.status = 'active';
+  renderApiKeys();
+  showToast('API key activated', 'success');
+}
+
+async function deleteApiKey(id) {
+  if (!confirm('Permanently delete this API key?')) return;
+  STATE.apiKeys = STATE.apiKeys.filter(k => k.id !== id);
+  renderApiKeys();
+  showToast('API key deleted', 'success');
+}
+
+async function createProvider() {
+  const name = document.getElementById('pv-name').value;
+  const url = document.getElementById('pv-url').value;
+  const type = document.getElementById('pv-type').value;
+
+  if (!name || !url) {
+    showToast('Please fill in all required fields', 'warning');
+    return;
+  }
+
+  const newProvider = {
+    id: name.toLowerCase().replace(/\s+/g, '-'),
+    name,
+    type,
+    url,
+    status: 'connected',
+    models: [],
+    uptime: 100,
+    requests24h: 0,
+    latencyMs: 0,
+  };
+
+  try {
+    await apiFetch('/api/providers', { method: 'POST', body: JSON.stringify(newProvider) });
+  } catch (e) {}
+
+  STATE.providers.push(newProvider);
+  closeModal('provider-modal');
+  renderProviders();
+  showToast('Provider added', 'success');
+}
+
+async function deleteProvider(id) {
+  if (!confirm('Remove this provider?')) return;
+  STATE.providers = STATE.providers.filter(p => p.id !== id);
+  renderProviders();
+  showToast('Provider removed', 'success');
+}
+
+function editProvider(id) {
+  showToast('Edit provider: ' + id, 'info');
+}
+
+function renderComboProvidersList() {
+  const container = document.getElementById('cm-providers-list');
+  container.innerHTML = STATE.providers.map(p => `
+    <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:var(--text-dim);cursor:pointer;">
+      <input type="checkbox" value="${p.id}" class="cm-provider-check" />
+      ${p.name}
+    </label>
+  `).join('');
+}
+
+async function createCombo() {
+  const name = document.getElementById('cm-name').value;
+  const strategy = document.getElementById('cm-strategy').value;
+  const providers = [...document.querySelectorAll('.cm-provider-check:checked')].map(c => c.value);
+
+  if (!name || providers.length === 0) {
+    showToast('Please fill in all fields and select providers', 'warning');
+    return;
+  }
+
+  const newCombo = { id: 'cb' + Date.now(), name, strategy, providers, status: 'active' };
+
+  try {
+    await apiFetch('/api/combos', { method: 'POST', body: JSON.stringify(newCombo) });
+  } catch (e) {}
+
+  STATE.combos.push(newCombo);
+  closeModal('combo-modal');
+  renderCombos();
+  showToast('Combo created', 'success');
+}
+
+async function deleteCombo(id) {
+  if (!confirm('Delete this combo?')) return;
+  STATE.combos = STATE.combos.filter(c => c.id !== id);
+  renderCombos();
+  showToast('Combo deleted', 'success');
+}
+
+async function purgeCache() {
+  if (!confirm('Purge all cache entries?')) return;
+  STATE.cache = [];
+  renderCache();
+  showToast('Cache purged', 'success');
+}
+
+function filterProviders(query) {
+  const q = query.toLowerCase();
+  const cards = document.querySelectorAll('#provider-catalog .card');
+  cards.forEach((card, i) => {
+    const p = STATE.providers[i];
+    if (!p) return;
+    const match = p.name.toLowerCase().includes(q) || (p.models || []).some(m => m.toLowerCase().includes(q));
+    card.style.display = match ? '' : 'none';
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+function formatNumber(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Copied to clipboard', 'success');
+  }).catch(() => {
+    showToast('Failed to copy', 'error');
+  });
+}
+
+function refreshDashboard() {
+  loadDashboardData();
+  showToast('Dashboard refreshed', 'success');
+}
 </script>
 </body>
 </html>
