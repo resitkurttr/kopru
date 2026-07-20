@@ -328,6 +328,91 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ═══════════════════════════════════════════════════════════════ */
+#provider-catalog {
+  max-height: none;
+  overflow: visible;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FLOATING API KEY POPUP
+   ═══════════════════════════════════════════════════════════════ */
+.key-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.key-popup {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  min-width: 420px;
+  max-width: 500px;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.25s ease;
+}
+.key-popup h3 {
+  font-size: 18px;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+.key-popup .key-display {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  color: var(--accent2);
+  word-break: break-all;
+  margin: 12px 0;
+  position: relative;
+}
+.key-popup .key-display .copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background var(--transition);
+}
+.key-popup .key-display .copy-btn:hover {
+  background: var(--accent-hover);
+}
+.key-popup .key-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+.key-popup .warning-text {
+  font-size: 12px;
+  color: var(--yellow);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    HEADER
    ═══════════════════════════════════════════════════════════════ */
 .header {
@@ -2724,7 +2809,12 @@ function renderApiKeys() {
   tbody.innerHTML = STATE.apiKeys.map(key => `
     <tr>
       <td style="font-weight:500;">${key.name}</td>
-      <td><code style="font-size:12px;color:var(--text-dim);">${key.key}</code></td>
+      <td>
+        <code style="font-size:12px;color:var(--text-dim);">${key.key.substring(0, 20)}...${key.key.slice(-4)}</code>
+        <button class="btn btn-secondary btn-sm" onclick="copyApiKey('${key.key}', this)" style="margin-left:6px;padding:2px 8px;font-size:11px;">
+          <span class="material-symbols-outlined" style="font-size:12px">content_copy</span>
+        </button>
+      </td>
       <td>
         ${(key.scopes || []).map(s => `<span class="badge badge-blue" style="margin-right:4px;">${s}</span>`).join('')}
       </td>
@@ -2732,15 +2822,15 @@ function renderApiKeys() {
       <td style="color:var(--text-dim);">${key.created}</td>
       <td>
         <span class="badge badge-${key.status === 'active' ? 'green' : 'red'}">
-          ${key.status}
+          ${key.status === 'active' ? 'Aktif' : 'İptal'}
         </span>
       </td>
       <td>
         <div style="display:flex;gap:4px;">
           ${key.status === 'active' ? `
-            <button class="btn btn-secondary btn-sm" onclick="revokeApiKey('${key.id}')">Revoke</button>
+            <button class="btn btn-secondary btn-sm" onclick="revokeApiKey('${key.id}')">İptal</button>
           ` : `
-            <button class="btn btn-success btn-sm" onclick="activateApiKey('${key.id}')">Activate</button>
+            <button class="btn btn-success btn-sm" onclick="activateApiKey('${key.id}')">Aktifleştir</button>
           `}
           <button class="btn btn-danger btn-sm" onclick="deleteApiKey('${key.id}')">
             <span class="material-symbols-outlined" style="font-size:14px">delete</span>
@@ -2836,8 +2926,134 @@ function renderProviders() {
 function addProviderFromCatalog(providerId) {
   const p = KOPRU_PROVIDERS[providerId];
   if (!p) return;
-  showToast(`${p.name} — API key ile ekle`, 'info');
-  // TODO: Modal ile API key girişi
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'key-popup-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  
+  overlay.innerHTML = `
+    <div class="key-popup" style="min-width:460px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:42px;height:42px;border-radius:10px;background:${p.color};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;">${p.textIcon || p.name.substring(0,2).toUpperCase()}</div>
+        <div>
+          <h3 style="margin:0;">${p.name} Ekle</h3>
+          <div style="font-size:12px;color:var(--text-dim);">${p.category || ''} ${p.hasFree ? '· <span style="color:var(--green);">Ücretsiz</span>' : ''}</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px;">API Key *</label>
+        <input type="password" id="modal-apikey" placeholder="sk-... veya token" 
+          style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px;">Base URL</label>
+        <input type="text" id="modal-baseurl" value="${p.website || ''}" placeholder="https://api.example.com/v1"
+          style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px;">Model (virgülle ayır)</label>
+        <input type="text" id="modal-models" placeholder="gpt-4o, claude-3-opus"
+          style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;" />
+      </div>
+      ${p.freeNote ? `<div class="warning-text" style="color:var(--text-muted);margin-bottom:12px;">
+        <span class="material-symbols-outlined" style="font-size:14px;">info</span> ${p.freeNote}
+      </div>` : ''}
+      <div class="key-actions">
+        <button class="btn btn-secondary" onclick="this.closest('.key-popup-overlay').remove()">İptal</button>
+        <button class="btn btn-primary" onclick="submitProviderFromModal('${providerId}')">
+          <span class="material-symbols-outlined" style="font-size:14px;">add</span> Ekle
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+  overlay.querySelector('#modal-apikey').focus();
+}
+
+async function submitProviderFromModal(providerId) {
+  const p = KOPRU_PROVIDERS[providerId];
+  const apiKey = document.getElementById('modal-apikey').value.trim();
+  const baseUrl = document.getElementById('modal-baseurl').value.trim();
+  const models = document.getElementById('modal-models').value.split(',').map(m => m.trim()).filter(Boolean);
+  
+  if (!apiKey) {
+    showToast('API Key gerekli', 'warning');
+    return;
+  }
+  
+  const provider = {
+    id: providerId,
+    name: p.name,
+    type: p.category || 'custom',
+    url: baseUrl,
+    apiKey: apiKey,
+    models: models,
+    status: 'connected',
+    enabled: true,
+  };
+  
+  try {
+    await apiFetch('/api/providers', { method: 'POST', body: JSON.stringify(provider) });
+  } catch (e) {}
+  
+  STATE.providers.push(provider);
+  document.querySelector('.key-popup-overlay')?.remove();
+  renderProviders();
+  showToast(`${p.name} eklendi ✓`, 'success');
+}
+
+function showApiKeyPopup(keyValue, keyName) {
+  const overlay = document.createElement('div');
+  overlay.className = 'key-popup-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  
+  overlay.innerHTML = `
+    <div class="key-popup">
+      <h3>🔑 API Anahtarı Oluşturuldu</h3>
+      <div style="font-size:13px;color:var(--text-dim);margin-bottom:4px;">${keyName || 'Yeni anahtar'}</div>
+      <div class="key-display">
+        <span id="apikey-value">${keyValue}</span>
+        <button class="copy-btn" onclick="copyApiKey('${keyValue}', this)">
+          <span class="material-symbols-outlined" style="font-size:14px;">content_copy</span> Kopyala
+        </button>
+      </div>
+      <div class="warning-text">
+        <span class="material-symbols-outlined" style="font-size:14px;">warning</span>
+        Bu anahtarı bir daha göremezsiniz. Kopyalayıp güvenli bir yere kaydedin.
+      </div>
+      <div class="key-actions">
+        <button class="btn btn-primary" onclick="this.closest('.key-popup-overlay').remove()">Tamam</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+}
+
+function copyApiKey(key, btn) {
+  navigator.clipboard.writeText(key).then(() => {
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">check</span> Kopyalandı!';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">content_copy</span> Kopyala';
+      btn.style.background = '';
+    }, 2000);
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = key;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">check</span> Kopyalandı!';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">content_copy</span> Kopyala';
+      btn.style.background = '';
+    }, 2000);
+  });
 }
 
 function renderCombos() {
@@ -3120,14 +3336,18 @@ async function createApiKey() {
   const scopes = [...document.querySelectorAll('#apikey-modal input[type=checkbox]:checked')].map(c => c.value);
 
   if (!name) {
-    showToast('Please enter a name', 'warning');
+    showToast('Lütfen bir isim girin', 'warning');
     return;
   }
+
+  // Gerçekçi API key üret
+  const randomPart = Array.from({length: 32}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('');
+  const fullKey = `sk-or-${name.toLowerCase().replace(/\\s+/g, '-')}-${randomPart}`;
 
   const newKey = {
     id: 'key' + Date.now(),
     name,
-    key: `sk-or-${name.toLowerCase().replace(/\s+/g, '-')}-****${Math.random().toString(36).slice(2, 6)}`,
+    key: fullKey,
     scopes,
     rateLimit,
     created: new Date().toISOString().split('T')[0],
@@ -3142,7 +3362,9 @@ async function createApiKey() {
   STATE.apiKeys.push(newKey);
   closeModal('apikey-modal');
   renderApiKeys();
-  showToast('API key created', 'success');
+  
+  // Yüzen popup ile anahtarı göster
+  showApiKeyPopup(fullKey, name);
 }
 
 async function revokeApiKey(id) {
