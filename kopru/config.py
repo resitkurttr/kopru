@@ -206,7 +206,13 @@ def resolve_model_chain(providers: List[ProviderConfig],
 
 
 def load_catalog() -> Dict:
-    """OmniRoute'tan alınan provider kataloğunu yükle."""
+    """Provider kataloğunu yükle — Python modülü tercih edilir, JSON fallback."""
+    try:
+        from .provider_catalog import PROVIDER_CATALOG, get_catalog_stats
+        stats = get_catalog_stats()
+        return {"providers": PROVIDER_CATALOG, "stats": stats}
+    except ImportError:
+        pass
     if CATALOG_PATH.exists():
         with open(CATALOG_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
