@@ -5,340 +5,415 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Köprü — AI Gateway Dashboard</title>
 <style>
-  :root {
-    --color-primary: #e54d5e;
-    --color-primary-hover: #c93d4e;
-    --color-accent: #6366f1;
-    --color-accent-hover: #8b5cf6;
-    --color-success: #22c55e;
-    --color-error: #ef4444;
-    --color-warning: #f59e0b;
-    --color-bg: #0d1117;
-    --color-bg-alt: #161b22;
-    --color-surface: #21262d;
-    --color-card: #161b22;
-    --color-border: #30363d;
-    --color-text: #c9d1d9;
-    --color-muted: #8b949e;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--color-bg); color: var(--color-text);
-    line-height: 1.6; display: flex; min-height: 100vh;
-  }
-  /* Sidebar */
-  .sidebar {
-    width: 240px; background: var(--color-bg-alt); border-right: 1px solid var(--color-border);
-    padding: 20px 0; position: fixed; height: 100vh; overflow-y: auto;
-  }
-  .sidebar .brand {
-    display: flex; align-items: center; gap: 10px; padding: 0 20px 20px;
-    border-bottom: 1px solid var(--color-border); margin-bottom: 16px;
-  }
-  .sidebar .brand .logo { font-size: 28px; }
-  .sidebar .brand h1 { font-size: 20px; font-weight: 700; }
-  .sidebar .brand span { font-size: 11px; color: var(--color-muted); }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px; padding: 10px 20px;
-    color: var(--color-muted); cursor: pointer; transition: 0.2s;
-    border-left: 3px solid transparent;
-  }
-  .nav-item:hover, .nav-item.active {
-    color: var(--color-text); background: var(--color-surface);
-    border-left-color: var(--color-primary);
-  }
-  .nav-item .icon { font-size: 18px; }
-  /* Main */
-  .main { margin-left: 240px; flex: 1; padding: 24px; max-width: 1200px; }
-  .header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
-  }
-  .header h2 { font-size: 24px; font-weight: 700; }
-  .status-pill {
-    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
-    background: var(--color-surface); border: 1px solid var(--color-border);
-    border-radius: 20px; font-size: 13px;
-  }
-  .status-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); }
-  /* Cards */
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-  .card {
-    background: var(--color-card); border: 1px solid var(--color-border);
-    border-radius: 12px; padding: 20px;
-  }
-  .card h3 { font-size: 14px; color: var(--color-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-  /* Provider topology */
-  .provider-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 0; border-bottom: 1px solid var(--color-border);
-  }
-  .provider-row:last-child { border-bottom: none; }
-  .provider-name { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-  .provider-icon {
-    width: 28px; height: 28px; border-radius: 6px; display: flex;
-    align-items: center; justify-content: center; font-size: 14px; font-weight: 700;
-    background: var(--color-surface); color: var(--color-primary);
-  }
-  .provider-meta { font-size: 12px; color: var(--color-muted); }
-  .badge {
-    padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
-  }
-  .badge.ok { background: rgba(34,197,94,0.15); color: var(--color-success); }
-  .badge.bad { background: rgba(239,68,68,0.15); color: var(--color-error); }
-  .badge.warn { background: rgba(245,158,11,0.15); color: var(--color-warning); }
-  /* Stats */
-  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .stat { text-align: center; padding: 16px; }
-  .stat .num { font-size: 28px; font-weight: 800; color: var(--color-primary); }
-  .stat .label { font-size: 12px; color: var(--color-muted); margin-top: 4px; }
-  /* Chat test */
-  .chat-box {
-    background: var(--color-surface); border: 1px solid var(--color-border);
-    border-radius: 12px; padding: 20px; margin-top: 16px;
-  }
-  textarea, input, select {
-    width: 100%; background: var(--color-bg); border: 1px solid var(--color-border);
-    color: var(--color-text); padding: 12px; border-radius: 8px;
-    font-family: inherit; font-size: 14px; resize: vertical;
-  }
-  textarea { min-height: 80px; margin-bottom: 10px; }
-  button {
-    background: var(--color-primary); color: #fff; border: none;
-    padding: 12px 24px; border-radius: 8px; cursor: pointer;
-    font-size: 14px; font-weight: 600; transition: 0.2s;
-  }
-  button:hover { background: var(--color-primary-hover); }
-  .response {
-    background: var(--color-bg); border: 1px solid var(--color-border);
-    border-radius: 8px; padding: 16px; margin-top: 12px; min-height: 80px;
-    white-space: pre-wrap; font-size: 14px;
-  }
-  .section { margin-bottom: 32px; }
-  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .hidden { display: none; }
-  /* Tier coverage */
-  .tier-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
-  .tier-bar .seg { height: 100%; }
+:root{--bg:#0a0a0f;--surface:#12121a;--card:#1a1a25;--border:#2a2a3a;--text:#e8e8f0;--muted:#8888a0;--accent:#6c5ce7;--accent2:#00cec9;--green:#00b894;--red:#e17055;--yellow:#fdcb6e;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header h1{font-size:20px;font-weight:700}.header h1 span{color:var(--accent)}
+.header-right{display:flex;gap:12px;align-items:center}
+.badge{background:var(--accent);color:#fff;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface);border-radius:var(--radius);padding:4px;border:1px solid var(--border)}
+.tab{padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:.2s;border:none;background:none}
+.tab:hover{color:var(--text);background:var(--card)}
+.tab.active{background:var(--accent);color:#fff}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.card h3{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.stat-row:last-child{border:none}
+.stat-val{font-size:24px;font-weight:700;color:var(--accent)}
+.stat-label{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);letter-spacing:.5px}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+tr:hover{background:rgba(108,92,231,.05)}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:.2s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{opacity:.9}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{opacity:.9}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{opacity:.9}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--text)}
+.btn-sm{padding:5px 10px;font-size:11px}
+input,select,textarea{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;width:100%;outline:none;transition:.2s}
+input:focus,select:focus{border-color:var(--accent)}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-row{display:flex;gap:12px}.form-row>*{flex:1}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto}
+.modal h2{font-size:16px;margin-bottom:16px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.tag-green{background:rgba(0,184,148,.15);color:var(--green)}
+.tag-red{background:rgba(225,112,85,.15);color:var(--red)}
+.tag-yellow{background:rgba(253,203,110,.15);color:var(--yellow)}
+.tag-blue{background:rgba(108,92,231,.15);color:var(--accent)}
+.key-display{background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:12px;font-family:monospace;font-size:13px;word-break:break-all;margin:12px 0;position:relative}
+.copy-btn{position:absolute;top:8px;right:8px}
+.empty{text-align:center;padding:40px;color:var(--muted)}
+.empty p{margin-top:8px;font-size:13px}
+.chat-box{display:flex;gap:8px;margin-top:12px}
+.chat-box input{flex:1}
+.chat-messages{max-height:300px;overflow-y:auto;margin:12px 0;padding:12px;background:var(--bg);border-radius:8px}
+.msg{padding:8px 12px;margin:4px 0;border-radius:8px;font-size:13px;max-width:80%}
+.msg-user{background:var(--accent);color:#fff;margin-left:auto;border-bottom-right-radius:2px}
+.msg-ai{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:2px}
 </style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="brand">
-      <span class="logo">🌉</span>
-      <div>
-        <h1>Köprü</h1>
-        <span>AI Gateway v1.0</span>
-      </div>
-    </div>
-    <div class="nav-item active" data-view="overview"><span class="icon">📊</span> Genel Bakış</div>
-    <div class="nav-item" data-view="providers"><span class="icon">🔗</span> Provider'lar</div>
-    <div class="nav-item" data-view="catalog"><span class="icon">📚</span> Katalog (277)</div>
-    <div class="nav-item" data-view="test"><span class="icon">💬</span> Test Sorgusu</div>
-    <div class="nav-item" data-view="stats"><span class="icon">📈</span> İstatistikler</div>
-    <div style="padding:16px 20px; margin-top:16px; border-top:1px solid var(--color-border);">
-      <label style="font-size:12px;color:var(--color-muted);display:block;margin-bottom:6px;">API URL</label>
-      <input id="api-url" value="http://194.146.36.72:20128" 
-             style="width:100%;padding:8px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:6px;color:var(--color-text);font-size:12px;"
+
+<div class="header">
+  <h1>🌉 <span>Köprü</span> Gateway</h1>
+  <div class="header-right">
+    <span class="badge">v2.0</span>
+    <span id="providerCount" class="badge" style="background:var(--green)">0 provider</span>
+    <div style="display:flex;align-items:center;gap:6px;margin-left:12px">
+      <label style="font-size:11px;color:var(--muted)">API:</label>
+      <input id="apiUrlInput" style="width:220px;padding:4px 8px;font-size:11px"
              onchange="setApiUrl(this.value)">
     </div>
-  </aside>
+  </div>
+</div>
 
-  <!-- Main -->
-  <main class="main">
-    <!-- Overview -->
-    <section id="view-overview" class="section">
-      <div class="header">
-        <h2>Genel Bakış</h2>
-        <span class="status-pill"><span class="dot"></span> Çalışıyor · Port 20128</span>
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="showPanel('overview')">📊 Genel Bakış</button>
+    <button class="tab" onclick="showPanel('providers')">🔌 Provider'lar</button>
+    <button class="tab" onclick="showPanel('keys')">🔑 API Keys</button>
+    <button class="tab" onclick="showPanel('usage')">📈 Kullanım</button>
+    <button class="tab" onclick="showPanel('chat')">💬 Test</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div id="panel-overview" class="panel active">
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>İstatistikler</h3>
+        <div id="statsContent"><div class="empty">Yükleniyor...</div></div>
       </div>
-      <div class="stat-grid">
-        <div class="card stat"><div class="num" id="ov-providers">0</div><div class="label">Aktif Provider</div></div>
-        <div class="card stat"><div class="num" id="ov-total">0</div><div class="label">Toplam İstek</div></div>
-        <div class="card stat"><div class="num" id="ov-success">0</div><div class="label">Başarılı</div></div>
-        <div class="card stat"><div class="num" id="ov-fallback">0</div><div class="label">Fallback</div></div>
+      <div class="card">
+        <h3>Provider Sağlık Durumu</h3>
+        <div id="healthContent"><div class="empty">Yükleniyor...</div></div>
       </div>
-      <div class="grid" style="margin-top:16px">
-        <div class="card">
-          <h3>Tier Coverage</h3>
-          <div class="tier-bar">
-            <div class="seg" style="background:var(--color-primary);width:40%"></div>
-            <div class="seg" style="background:var(--color-accent);width:35%"></div>
-            <div class="seg" style="background:var(--color-success);width:25%"></div>
-          </div>
-          <p style="font-size:12px;color:var(--color-muted);margin-top:8px">
-            Best-Reasoning · Moderate · Cheapest katmanları otomatik seçilir.
-          </p>
-        </div>
-        <div class="card">
-          <h3>Endpoint</h3>
-          <p style="font-size:13px;word-break:break-all"><code>http://localhost:20128/v1/chat/completions</code></p>
-          <p style="font-size:12px;color:var(--color-muted);margin-top:8px">OpenAI uyumlu · Claude Code / Cursor / OpenCode bağlanabilir</p>
-        </div>
+    </div>
+  </div>
+
+  <!-- PROVIDERS -->
+  <div id="panel-providers" class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="font-size:16px">Provider Yönetimi</h2>
+      <button class="btn btn-primary" onclick="showAddProvider()">+ Provider Ekle</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>İsim</th><th>URL</th><th>Modeller</th><th>Öncelik</th><th>Kategori</th><th>Durum</th><th>İşlem</th></tr></thead>
+        <tbody id="providerTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- API KEYS -->
+  <div id="panel-keys" class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="font-size:16px">API Key Yönetimi</h2>
+      <button class="btn btn-primary" onclick="showAddKey()">+ Key Üret</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>İsim</th><th>Key</th><th>Rate Limit</th><th>İstekler</th><th>Son Kullanım</th><th>Durum</th><th>İşlem</th></tr></thead>
+        <tbody id="keyTable"></tbody>
+      </table>
+    </div>
+    <div id="newKeyDisplay" style="display:none;margin-top:16px">
+      <div class="card">
+        <h3>🔑 Yeni API Key Üretildi</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Bu key'i kopyalayın — bir daha gösterilmeyecek:</p>
+        <div class="key-display" id="newKeyValue"></div>
+        <button class="btn btn-ghost btn-sm copy-btn" onclick="copyKey()">📋 Kopyala</button>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Providers -->
-    <section id="view-providers" class="section hidden">
-      <div class="header"><h2>Provider Durumu</h2></div>
-      <div class="card"><div id="provider-list"><p style="color:var(--color-muted)">Yükleniyor...</p></div></div>
-    </section>
+  <!-- USAGE -->
+  <div id="panel-usage" class="panel">
+    <div class="card">
+      <h3>Kullanım İstatistikleri (Son 7 Gün)</h3>
+      <div id="usageContent"><div class="empty">Yükleniyor...</div></div>
+    </div>
+  </div>
 
-    <!-- Catalog -->
-    <section id="view-catalog" class="section hidden">
-      <div class="header"><h2>Provider Kataloğu</h2><span class="status-pill" id="cat-count">277</span></div>
-      <div id="catalog-list"></div>
-    </section>
-
-    <!-- Test -->
-    <section id="view-test" class="section hidden">
-      <div class="header"><h2>Test Sorgusu</h2></div>
+  <!-- CHAT TEST -->
+  <div id="panel-chat" class="panel">
+    <div class="card">
+      <h3>Sohbet Testi</h3>
+      <div class="form-row" style="margin-bottom:12px">
+        <div class="form-group"><label>Model (boş = auto-fallback)</label><input id="chatModel" placeholder="deepseek/deepseek-chat"></div>
+        <div class="form-group"><label>API Key (opsiyonel)</label><input id="chatApiKey" placeholder="kp_..." type="password"></div>
+      </div>
+      <div class="chat-messages" id="chatMessages"><div class="empty">Mesaj gönderin...</div></div>
       <div class="chat-box">
-        <select id="model"></select>
-        <textarea id="prompt" placeholder="Mesajını yaz...">Merhaba Köprü, nasılsın?</textarea>
-        <button onclick="send()">Gönder</button>
-        <div id="response" class="response"></div>
+        <input id="chatInput" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary" onclick="sendChat()">Gönder</button>
       </div>
-    </section>
+    </div>
+  </div>
+</div>
 
-    <!-- Stats -->
-    <section id="view-stats" class="section hidden">
-      <div class="header"><h2>İstatistikler</h2></div>
-      <div class="grid">
-        <div class="card"><h3>Toplam İstek</h3><div class="num" id="st-total" style="font-size:32px;font-weight:800;color:var(--color-primary)">0</div></div>
-        <div class="card"><h3>Başarı Oranı</h3><div class="num" id="st-rate" style="font-size:32px;font-weight:800;color:var(--color-success)">0%</div></div>
-        <div class="card"><h3>Fallback Kullanımı</h3><div class="num" id="st-fallback" style="font-size:32px;font-weight:800;color:var(--color-warning)">0</div></div>
-        <div class="card"><h3>Toplam Token</h3><div class="num" id="st-tokens" style="font-size:32px;font-weight:800;color:var(--color-accent)">0</div></div>
-      </div>
-      <div class="card" style="margin-top:16px">
-        <h3>Provider Bazlı İstek</h3>
-        <div id="st-per-provider"></div>
-      </div>
-    </section>
-  </main>
+<!-- ADD PROVIDER MODAL -->
+<div class="modal-overlay" id="addProviderModal">
+  <div class="modal">
+    <h2>Yeni Provider Ekle</h2>
+    <div class="form-group"><label>İsim</label><input id="pName" placeholder="openrouter"></div>
+    <div class="form-group"><label>Base URL</label><input id="pUrl" placeholder="https://openrouter.ai/api/v1"></div>
+    <div class="form-group"><label>API Key</label><input id="pKey" type="password" placeholder="sk-..."></div>
+    <div class="form-group"><label>Modeller (virgülle)</label><input id="pModels" placeholder="deepseek-chat, gemma-4-31b"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Öncelik</label><input id="pPriority" type="number" value="10"></div>
+      <div class="form-group"><label>Kategori</label><select id="pCategory"><option>cloud</option><option>local</option><option>free</option><option>premium</option></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addProviderModal')">İptal</button>
+      <button class="btn btn-primary" onclick="addProvider()">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD KEY MODAL -->
+<div class="modal-overlay" id="addKeyModal">
+  <div class="modal">
+    <h2>Yeni API Key Üret</h2>
+    <div class="form-group"><label>İsim</label><input id="kName" placeholder="web-app"></div>
+    <div class="form-group"><label>Kullanıcı ID</label><input id="kUser" placeholder="kullanici-adi"></div>
+    <div class="form-group"><label>Rate Limit (istek/dakika)</label><input id="kRate" type="number" value="60"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addKeyModal')">İptal</button>
+      <button class="btn btn-primary" onclick="addKey()">Üret</button>
+    </div>
+  </div>
+</div>
 
 <script>
-// ── Navigation ──
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-    item.classList.add('active');
-    document.getElementById('view-' + item.dataset.view).classList.remove('hidden');
-    if (item.dataset.view === 'catalog') loadCatalog();
-    if (item.dataset.view === 'providers') loadProviders();
-  });
-});
+const API = localStorage.getItem('kopru_api_url') || 'http://194.146.36.72:20128';
+function setApiUrl(url) { localStorage.setItem('kopru_api_url', url); location.reload(); }
+let currentApiKey = '';
 
-// ── Config ──
-const API_BASE = (localStorage.getItem('kopru_api_url') || 'http://194.146.36.72:20128').replace(/\/$/, '');
-
-// API URL ayarla
-function setApiUrl(url) {
-  localStorage.setItem('kopru_api_url', url);
-  location.reload();
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'overview') loadOverview();
+  if (name === 'providers') loadProviders();
+  if (name === 'keys') loadKeys();
+  if (name === 'usage') loadUsage();
 }
 
-// ── Data loaders ──
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function showAddProvider() { document.getElementById('addProviderModal').classList.add('show'); }
+function showAddKey() { document.getElementById('addKeyModal').classList.add('show'); }
+
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, { headers: {'Content-Type': 'application/json'}, ...opts });
+  return r.json();
+}
+
+// ── Overview ──────────────────────────────────────────────────────────────
 async function loadOverview() {
-  try {
-    const [prov, status] = await Promise.all([
-      fetch(API_BASE + '/api/providers').then(r => r.json()),
-      fetch(API_BASE + '/api/status').then(r => r.json())
-    ]);
-    const active = Object.values(prov).filter(p => p.enabled && p.healthy).length;
-    document.getElementById('ov-providers').textContent = active;
-    document.getElementById('ov-total').textContent = status.total_requests;
-    document.getElementById('ov-success').textContent = status.successful;
-    document.getElementById('ov-fallback').textContent = status.fallback_used;
-  } catch (e) {}
+  const s = await api('/api/status');
+  document.getElementById('providerCount').textContent = s.providers + ' provider';
+  document.getElementById('statsContent').innerHTML = `
+    <div class="stat-row"><span class="stat-label">Toplam İstek</span><span class="stat-val">${s.total_requests}</span></div>
+    <div class="stat-row"><span class="stat-label">Başarılı</span><span style="color:var(--green);font-weight:700">${s.successful}</span></div>
+    <div class="stat-row"><span class="stat-label">Başarısız</span><span style="color:var(--red);font-weight:700">${s.failed}</span></div>
+    <div class="stat-row"><span class="stat-label">Fallback Kullanımı</span><span style="color:var(--yellow);font-weight:700">${s.fallback_used}</span></div>
+    <div class="stat-row"><span class="stat-label">Toplam Token</span><span class="stat-val">${s.total_tokens.toLocaleString()}</span></div>
+    <div class="stat-row"><span class="stat-label">Son Hata</span><span style="color:var(--red);font-size:12px">${s.last_error || 'yok'}</span></div>
+  `;
+  const h = await api('/health');
+  let healthHtml = '';
+  for (const [name, info] of Object.entries(h.providers || {})) {
+    const cls = info.healthy ? 'tag-green' : 'tag-red';
+    const txt = info.healthy ? 'Sağlıklı' : (info.circuit_open ? 'Circuit Açık' : 'Sorunlu');
+    healthHtml += `<div class="stat-row"><span>${name}</span><span class="tag ${cls}">${txt} (${info.failures} hata)</span></div>`;
+  }
+  document.getElementById('healthContent').innerHTML = healthHtml || '<div class="empty">Provider yok</div>';
 }
 
+// ── Providers ─────────────────────────────────────────────────────────────
 async function loadProviders() {
-  try {
-    const data = await fetch(API_BASE + '/api/providers').then(r => r.json());
-    const el = document.getElementById('provider-list');
-    el.innerHTML = '';
-    for (const [name, info] of Object.entries(data)) {
-      const badge = info.healthy ? '<span class="badge ok">çalışıyor</span>'
-                                  : (info.circuit_open ? '<span class="badge bad">devre açık</span>' : '<span class="badge warn">serviste</span>');
-      el.innerHTML += `<div class="provider-row">
-        <div class="provider-name"><div class="provider-icon">${name[0].toUpperCase()}</div>${name}</div>
-        <div style="text-align:right">
-          <div class="provider-meta">${info.models.join(', ')}</div>
-          ${badge}
-        </div>
-      </div>`;
-    }
-  } catch (e) {
-    document.getElementById('provider-list').innerHTML = '<p style="color:var(--color-error)">Yüklenemedi</p>';
+  const d = await api('/api/providers');
+  const providers = d.providers || [];
+  document.getElementById('providerCount').textContent = providers.length + ' provider';
+  let html = '';
+  if (!providers.length) { html = '<tr><td colspan="7" class="empty">Henüz provider eklenmemiş</td></tr>'; }
+  for (const p of providers) {
+    const models = (p.models || []).join(', ');
+    const cls = p.enabled ? 'tag-green' : 'tag-red';
+    const txt = p.enabled ? 'Aktif' : 'Pasif';
+    html += `<tr>
+      <td><strong>${p.name}</strong></td>
+      <td style="font-size:11px;color:var(--muted)">${p.base_url}</td>
+      <td><span class="tag tag-blue">${p.models?.length || 0} model</span> <span style="font-size:11px">${models.slice(0,50)}${models.length>50?'...':''}</span></td>
+      <td>${p.priority}</td>
+      <td><span class="tag tag-blue">${p.category}</span></td>
+      <td><span class="tag ${cls}">${txt}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="toggleProvider(${p.id},${!p.enabled})">${p.enabled?'Kapat':'Aç'}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProvider(${p.id})">Sil</button>
+      </td>
+    </tr>`;
   }
+  document.getElementById('providerTable').innerHTML = html;
 }
 
-async function loadCatalog() {
-  try {
-    const data = await fetch(API_BASE + '/api/providers-catalog').then(r => r.json());
-    const total = Object.keys(data.providers || {}).length;
-    document.getElementById('cat-count').textContent = total;
-    const el = document.getElementById('catalog-list');
-    el.innerHTML = '';
-    for (const [cat, ids] of Object.entries(data.categories || {})) {
-      el.innerHTML += `<div class="card" style="margin-bottom:12px">
-        <h3>${cat} (${ids.length})</h3>
-        <div class="provider-meta">${ids.join(' · ')}</div>
-      </div>`;
-    }
-  } catch (e) {
-    document.getElementById('catalog-list').innerHTML = '<p style="color:var(--color-error)">Katalog yüklenemedi</p>';
+async function addProvider() {
+  const models = document.getElementById('pModels').value.split(',').map(s=>s.trim()).filter(Boolean);
+  await api('/api/providers', { method: 'POST', body: JSON.stringify({
+    name: document.getElementById('pName').value,
+    base_url: document.getElementById('pUrl').value,
+    api_key: document.getElementById('pKey').value,
+    models, priority: parseInt(document.getElementById('pPriority').value)||0,
+    category: document.getElementById('pCategory').value,
+  })});
+  closeModal('addProviderModal');
+  loadProviders();
+}
+
+async function toggleProvider(id, enabled) {
+  await api(`/api/providers/${id}/toggle?enabled=${enabled}`, { method: 'POST' });
+  loadProviders();
+}
+
+async function deleteProvider(id) {
+  if (!confirm('Bu provider\'ı silmek istediğinize emin misiniz?')) return;
+  await api(`/api/providers/${id}`, { method: 'DELETE' });
+  loadProviders();
+}
+
+// ── API Keys ──────────────────────────────────────────────────────────────
+async function loadKeys() {
+  const d = await api('/api/keys');
+  const keys = d.keys || [];
+  let html = '';
+  if (!keys.length) { html = '<tr><td colspan="7" class="empty">Henüz API key üretilmemiş</td></tr>'; }
+  for (const k of keys) {
+    const cls = k.enabled ? 'tag-green' : 'tag-red';
+    const txt = k.enabled ? 'Aktif' : 'Devre Dışı';
+    const lastUsed = k.last_used_at ? new Date(k.last_used_at*1000).toLocaleDateString('tr') : '-';
+    html += `<tr>
+      <td><strong>${k.name || 'İsimsiz'}</strong></td>
+      <td style="font-family:monospace;font-size:12px">${k.key_prefix}</td>
+      <td>${k.rate_limit}/dk</td>
+      <td>${k.total_requests}</td>
+      <td>${lastUsed}</td>
+      <td><span class="tag ${cls}">${txt}</span></td>
+      <td>
+        ${k.enabled ? `<button class="btn btn-ghost btn-sm" onclick="revokeKey(${k.id})">Devre Dışı Bırak</button>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="deleteKey(${k.id})">Sil</button>
+      </td>
+    </tr>`;
   }
+  document.getElementById('keyTable').innerHTML = html;
 }
 
-async function loadStats() {
-  try {
-    const d = await fetch(API_BASE + '/api/status').then(r => r.json());
-    document.getElementById('st-total').textContent = d.total_requests;
-    const rate = d.total_requests ? Math.round(d.successful / d.total_requests * 100) : 0;
-    document.getElementById('st-rate').textContent = rate + '%';
-    document.getElementById('st-fallback').textContent = d.fallback_used;
-    document.getElementById('st-tokens').textContent = d.total_tokens;
-    const pp = document.getElementById('st-per-provider');
-    pp.innerHTML = Object.entries(d.per_provider || {})
-      .map(([k,v]) => `<div class="provider-row"><span>${k}</span><span class="provider-meta">${v} istek</span></div>`)
-      .join('') || '<p style="color:var(--color-muted)">Henüz veri yok</p>';
-  } catch (e) {}
+async function addKey() {
+  const d = await api('/api/keys', { method: 'POST', body: JSON.stringify({
+    name: document.getElementById('kName').value,
+    user_id: document.getElementById('kUser').value,
+    rate_limit: parseInt(document.getElementById('kRate').value)||60,
+  })});
+  closeModal('addKeyModal');
+  currentApiKey = d.key?.key || '';
+  document.getElementById('newKeyValue').textContent = currentApiKey;
+  document.getElementById('newKeyDisplay').style.display = 'block';
+  loadKeys();
 }
 
-async function loadModels() {
-  try {
-    const data = await fetch(API_BASE + '/v1/models').then(r => r.json());
-    const sel = document.getElementById('model');
-    sel.innerHTML = '<option value="">Otomatik (fallback)</option>';
-    (data.data || []).forEach(m => sel.innerHTML += `<option value="${m.id}">${m.id}</option>`);
-  } catch (e) {}
+function copyKey() {
+  navigator.clipboard.writeText(currentApiKey);
+  event.target.textContent = '✅ Kopyalandı';
+  setTimeout(() => event.target.textContent = '📋 Kopyala', 1500);
 }
 
-async function send() {
-  const model = document.getElementById('model').value;
-  const prompt = document.getElementById('prompt').value;
-  const resp = document.getElementById('response');
-  resp.textContent = '⏳ Düşünüyor...';
+async function revokeKey(id) {
+  await api(`/api/keys/${id}/revoke`, { method: 'POST' });
+  loadKeys();
+}
+
+async function deleteKey(id) {
+  if (!confirm('Bu key\'i silmek istediğinize emin misiniz?')) return;
+  await api(`/api/keys/${id}`, { method: 'DELETE' });
+  loadKeys();
+}
+
+// ── Usage ─────────────────────────────────────────────────────────────────
+async function loadUsage() {
+  const d = await api('/api/usage?days=7');
+  let html = `
+    <div class="grid grid-2" style="margin-bottom:16px">
+      <div class="stat-row"><span class="stat-label">Toplam İstek</span><span class="stat-val">${d.total_requests}</span></div>
+      <div class="stat-row"><span class="stat-label">Toplam Token</span><span class="stat-val">${d.total_tokens?.toLocaleString()||0}</span></div>
+      <div class="stat-row"><span class="stat-label">Ortalama Gecikme</span><span class="stat-val">${d.avg_latency_ms}ms</span></div>
+      <div class="stat-row"><span class="stat-label">Hata Sayısı</span><span style="color:var(--red);font-weight:700">${d.error_count}</span></div>
+    </div>
+  `;
+  if (d.by_provider?.length) {
+    html += '<h3 style="font-size:13px;margin:12px 0 8px">Provider Bazında</h3><table><thead><tr><th>Provider</th><th>İstek</th><th>Token</th></tr></thead><tbody>';
+    for (const p of d.by_provider) {
+      html += `<tr><td>${p.provider_name||'bilinmeyen'}</td><td>${p.cnt}</td><td>${p.tokens?.toLocaleString()||0}</td></tr>`;
+    }
+    html += '</tbody></table>';
+  }
+  if (d.by_model?.length) {
+    html += '<h3 style="font-size:13px;margin:12px 0 8px">Model Bazında (Top 10)</h3><table><thead><tr><th>Model</th><th>İstek</th></tr></thead><tbody>';
+    for (const m of d.by_model) {
+      html += `<tr><td>${m.model||'bilinmeyen'}</td><td>${m.cnt}</td></tr>`;
+    }
+    html += '</tbody></table>';
+  }
+  document.getElementById('usageContent').innerHTML = html;
+}
+
+// ── Chat ──────────────────────────────────────────────────────────────────
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  const box = document.getElementById('chatMessages');
+  if (box.querySelector('.empty')) box.innerHTML = '';
+  box.innerHTML += `<div class="msg msg-user">${esc(msg)}</div>`;
+  box.scrollTop = box.scrollHeight;
+
+  const headers = {'Content-Type': 'application/json'};
+  const key = document.getElementById('chatApiKey').value.trim();
+  if (key) headers['Authorization'] = 'Bearer ' + key;
+
   try {
-    const res = await fetch(API_BASE + '/v1/chat/completions', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ model, stream: false, messages: [{role: 'user', content: prompt}] })
+    const r = await fetch(API + '/v1/chat/completions', {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        model: document.getElementById('chatModel').value,
+        messages: [{role:'user', content:msg}],
+        stream: false,
+      })
     });
-    const data = await res.json();
-    if (data.error) resp.textContent = '❌ ' + data.error.message;
-    else resp.textContent = data.choices[0].message.content;
-    loadOverview(); loadStats();
-  } catch (e) { resp.textContent = '❌ Bağlantı hatası: ' + e; }
+    const d = await r.json();
+    const content = d.choices?.[0]?.message?.content || d.error?.message || 'Yanıt alınamadı';
+    box.innerHTML += `<div class="msg msg-ai">${esc(content)}</div>`;
+  } catch(e) {
+    box.innerHTML += `<div class="msg msg-ai" style="color:var(--red)">Hata: ${esc(e.message)}</div>`;
+  }
+  box.scrollTop = box.scrollHeight;
 }
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
 // Init
-loadOverview(); loadModels(); loadStats();
-setInterval(() => { loadOverview(); loadStats(); }, 15000);
+document.getElementById('apiUrlInput').value = API;
+loadOverview();
 </script>
 </body>
 </html>
